@@ -1,47 +1,20 @@
 # Librerías
 
-## Librerías Estándar (Arduino IDE)
+## Librerías estándar
 
-Instalar desde el Library Manager de Arduino IDE:
+El proyecto **no usa librerías externas**. Todas vienen incluidas en el paquete **esp32 by Espressif Systems** que se instala desde el Boards Manager de Arduino IDE.
 
-1. **[Nombre Librería 1]** - v[X.X.X]
-   - Propósito: [Descripción]
-   - Instalación: `Sketch > Include Library > Manage Libraries > Buscar "[nombre]"`
+## Librerías personalizadas o modificadas
 
-2. **[Nombre Librería 2]** - v[X.X.X]
-   - Propósito: [Descripción]
-   - Instalación: [Instrucciones]
+Ninguna.
 
----
+## Dependencias completas
 
-## Librerías Personalizadas/Modificadas
-
-Si hay librerías modificadas o no disponibles en Arduino IDE, incluir en esta carpeta:
-
-### Estructura
-```
-librerias/
-├── MiLibreria/
-│   ├── MiLibreria.h
-│   ├── MiLibreria.cpp
-│   ├── keywords.txt
-│   └── README.md
-```
-
-### Instalación Manual
-```bash
-# Copiar carpeta a Arduino libraries
-cp -r MiLibreria ~/Documents/Arduino/libraries/
-```
-
----
-
-## Dependencias Completas
-
-Listar TODAS las librerías necesarias con versiones exactas:
-
-| Librería | Versión | Fuente | Obligatoria |
-|----------|---------|--------|-------------|
-| WiFi | Built-in | ESP32 Core | ✅ |
-| [Lib 1] | x.x.x | Arduino Library Manager | ✅ |
-| [Lib 2] | x.x.x | GitHub | ❌ |
+| Librería / herramienta | Versión | Fuente | Obligatoria |
+|------------------------|---------|--------|-------------|
+| Paquete esp32 (Espressif) | 3.3.12 | Arduino IDE → Boards Manager | ✅ |
+| WiFi | incluida en el paquete esp32 | ESP32 Core | ✅ |
+| WiFiClientSecure | incluida en el paquete esp32 | ESP32 Core | ✅ |
+| HTTPClient | incluida en el paquete esp32 | ESP32 Core | ✅ |
+| Driver CP210x (Windows) | v6.7.6 | silabs.com, "CP210x Windows Drivers" | ✅ si el PC no reconoce el ESP32 |
+| App Telegram + bot de @BotFather | — | App Store / Google Play | ✅ para los avisos al celular |
