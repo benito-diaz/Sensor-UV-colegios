@@ -1,38 +1,25 @@
 # Bill of Materials (BOM)
 
-## Formato del Archivo
+> Completar las columnas de precio y proveedor con los datos reales de compra.
 
-El archivo BOM debe incluir las siguientes columnas:
+| Cantidad | Componente | Especificación | Fabricante | Código/SKU | Proveedor | Precio unitario (CLP) | Precio total (CLP) |
+|----------|------------|----------------|------------|------------|-----------|-----------------------|--------------------|
+| 1 | Placa ESP32 DevKit | 30 pines, WiFi + Bluetooth, USB CP2102 | Espressif (módulo ESP-WROOM-32) | ESP32-WROOM-32 | [completar] | [completar] | [completar] |
+| 1 | Sensor UV | Módulo GUVA-S12SD, salida analógica, 240–370 nm | Keyes | GUVA-S12SD | [completar] | [completar] | [completar] |
+| 1 | Mini semáforo LED | Módulo 3 LEDs (R, Y, G) con resistencias | — | V1224 | [completar] | [completar] | [completar] |
+| 7 | Cables dupont | Hembra-hembra | — | — | [completar] | [completar] | [completar] |
+| 1 | Cable USB | Micro-USB de datos | — | — | [completar] | [completar] | [completar] |
+| 1 | Protoboard (usada en pruebas) | 830 puntos | — | MB-102 | [completar] | [completar] | [completar] |
 
-| Columna | Descripción | Ejemplo |
-|---------|-------------|---------|
-| Cantidad | Número de unidades | 1 |
-| Componente | Nombre descriptivo | ESP32 DevKit V1 |
-| Especificación | Detalles técnicos | 30 pines, WiFi+BT |
-| Fabricante | Marca del componente | Espressif |
-| Código/SKU | Identificador único | ESP32-WROOM-32 |
-| Proveedor | Tienda/distribuidor | AliExpress, MercadoLibre |
-| Precio Unitario | Costo por unidad (CLP) | $8,990 |
-| Precio Total | Cantidad × Precio | $8,990 |
-| Datasheet | Link a especificaciones | [URL] |
+**Costo total estimado:** $[completar] CLP
 
----
+### Desglose por categoría
+- Microcontrolador: $[ ]
+- Sensores: $[ ]
+- Actuadores (semáforo): $[ ]
+- Estructura / encapsulado: $[ ]
+- Otros (cables): $[ ]
 
-## Archivos a Incluir
-
-- `bom_completo.xlsx` - Lista completa de materiales
-- `bom_completo.pdf` - Versión PDF para visualización
-- `datasheets/` - Carpeta con PDFs de componentes críticos
-
----
-
-## Presupuesto Total
-
-**Costo Total Estimado:** $[XXXXX] CLP
-
-### Desglose por Categoría
-- Microcontrolador: $X,XXX
-- Sensores: $X,XXX
-- Actuadores: $X,XXX
-- Estructura/Encapsulado: $X,XXX
-- Otros: $X,XXX
+## Datasheets de referencia
+- ESP32: https://www.espressif.com/en/products/socs/esp32
+- GUVA-S12SD: hoja de datos del fabricante (GenUV)
