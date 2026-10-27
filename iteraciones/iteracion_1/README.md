@@ -1,107 +1,28 @@
-# Iteración 1 - Concepto Inicial
+# Iteración 1 – Concepto inicial (Avance 1)
 
-## Información General
-
-**Fecha:** [XX/XX/2025]  
-**Versión:** v1.0  
-**Estado:** Prototipo alpha - Prueba de concepto  
-**Avance asociado:** Planificación inicial / Avance #1
-
----
+**Fecha:** septiembre 2026
+**Estado:** concepto / propuesta, sin prototipo electrónico
 
 ## Descripción
 
-Primera versión del prototipo, enfocada en validar la factibilidad técnica del concepto.
+Sistema de alerta de radiación UV para colegios de Peñalolén, planteado en el Avance 1:
 
-**Objetivo de esta iteración:**
-- Probar conexión de sensores básicos
-- Validar comunicación con microcontrolador
-- Demostrar concepto de actuación
-- Circuito básico en protoboard
+- **Ubicación:** un sensor UV fijo en un poste del colegio. Los niños tenían que acercarse a ese lugar para consultar el nivel de radiación.
+- **Cápsula:** diseño básico cuya función principal era contener el sensor.
+- **Información:** principalmente cualitativa, un color asociado a un riesgo general.
 
----
+## Problemas identificados
 
-## Componentes Utilizados
+1. Un dispositivo fijo obliga a los niños a ir hasta él y no se puede usar en otros espacios.
+2. Un color sin un rango numérico no explica por qué hay riesgo ni qué precauciones tomar.
+3. No había forma de avisar al personal del colegio a distancia.
 
-### Hardware
-- Microcontrolador: [Modelo]
-- Sensores:
-  - [Sensor 1]
-  - [Sensor 2]
-- Actuadores:
-  - [Actuador 1]
-- Otros: [Lista]
+## Mejoras planificadas para la iteración 2
 
-### Software
-- IDE: Arduino IDE
-- Librerías: [Lista]
-- Versión código: v1.0
+- Dispositivo que se pueda instalar y retirar del poste.
+- Indicador tipo semáforo (verde, amarillo, rojo) integrado en la cápsula.
+- Cada color asociado a un rango del índice UV de la OMS, con una explicación sencilla y las precauciones recomendadas.
+- Prototipo electrónico funcional con ESP32.
 
----
-
-## Fotos del Prototipo
-
-Incluir en esta carpeta:
-- `v1_circuito_protoboard.jpg`
-- `v1_vista_general.jpg`
-- `v1_detalle_conexiones.jpg`
-
----
-
-## Resultados de Testing Inicial
-
-### Funcionalidad Lograda
-✅ [Función 1]  
-✅ [Función 2]  
-❌ [Función 3 - no funcionó]
-
-### Problemas Identificados
-
-1. **Problema 1:**
-   - Descripción: [Detalles]
-   - Causa probable: [Análisis]
-   - Solución propuesta: [Plan]
-
-2. **Problema 2:**
-   - Descripción: [Detalles]
-   - Causa probable: [Análisis]
-   - Solución propuesta: [Plan]
-
----
-
-## Aprendizajes
-
-### Técnicos
-- [Aprendizaje 1]
-- [Aprendizaje 2]
-
-### De Diseño
-- [Aprendizaje 1]
-- [Aprendizaje 2]
-
----
-
-## Plan para Iteración 2
-
-### Mejoras Planificadas
-
-**Hardware:**
-- [ ] [Mejora 1]
-- [ ] [Mejora 2]
-
-**Software:**
-- [ ] [Mejora 1]
-- [ ] [Mejora 2]
-
-**Diseño:**
-- [ ] Iniciar diseño de encapsulado
-- [ ] Mejorar ruteo de cables
-
----
-
-## Archivos en esta Carpeta
-
-- `v1_codigo.ino` - Código de esta versión
-- `v1_esquema.png` - Esquema del circuito
-- `v1_fotos/` - Fotografías del prototipo
-- `v1_notas.txt` - Notas adicionales del equipo
+## Archivos
+- Presentación del Avance 1: [subir a `documentacion/presentacion/` si corresponde]

@@ -2,154 +2,145 @@
 
 ## Propósito
 
-Esta carpeta documenta la evolución del prototipo a través de las diferentes versiones desarrolladas durante el curso.
-
-**CRÍTICO:** Demostrar el proceso iterativo es un requisito para obtener puntaje completo en "Integración y Refinamiento" (2.5 puntos).
-
----
-
-## Estructura de Carpetas
-
-Cada iteración tiene su propia carpeta con documentación de esa versión:
+Esta carpeta documenta cómo evolucionó el sistema desde el concepto inicial (Avance 1) hasta el prototipo funcional actual (Avance 2), y qué falta para la versión final.
 
 ```
 iteraciones/
-├── iteracion_1/    # Concepto inicial - Prototipo alpha
-├── iteracion_2/    # Primera iteración - Avance #2
-└── iteracion_3/    # Versión final - Avance #3
+├── iteracion_1/    # Concepto inicial – Avance 1
+├── iteracion_2/    # Prototipo funcional – Avance 2 (versiones v2.0 a v2.3)
+└── iteracion_3/    # Versión final – Avance 3 (planificada)
 ```
 
 ---
 
-## Contenido de Cada Iteración
+## Tabla comparativa de iteraciones
 
-Cada carpeta debe incluir:
-
-1. **README.md** - Descripción de la versión
-2. **Fotos** - Imágenes del prototipo en ese estado
-3. **Esquema** - Circuito de esa versión (si cambió)
-4. **Código** - Versión del software (si cambió)
-5. **Notas** - Problemas identificados y mejoras planificadas
-
----
-
-## Tabla Comparativa de Iteraciones
-
-| Aspecto | v1 | v2 | v3 |
-|---------|----|----|----| 
-| **Fecha** | [fecha] | [fecha] | [fecha] |
-| **Sensores** | [lista] | [lista] | [lista] |
-| **Actuadores** | [lista] | [lista] | [lista] |
-| **Conectividad** | [tipo] | [tipo] | [tipo] |
-| **Encapsulado** | ❌ | Prototipo | Finalizado |
-| **Testing** | Solo equipo | 2 usuarios | 5+ usuarios |
-| **Funcionalidad** | 60% | 80% | 100% |
+| Aspecto | v1 – Concepto | v2 – Prototipo funcional | v3 – Final (planificada) |
+|---------|---------------|--------------------------|--------------------------|
+| **Fecha** | Septiembre 2026 | 14/10 – 27/10/2026 | [fecha Avance 3] |
+| **Sensores** | Sensor UV (concepto) | GUVA-S12SD conectado al ESP32 | GUVA-S12SD calibrado con MeteoChile |
+| **Actuadores** | — | Semáforo LED V1224 (5 niveles con parpadeo) | Semáforo integrado en la cápsula |
+| **Conectividad** | — | WiFi + avisos por Telegram | WiFi + Telegram (posible grupo del colegio) |
+| **Ubicación** | Fijo en un poste | Portátil (propuesta: instalar y retirar del poste) | Portátil con soporte para poste |
+| **Encapsulado** | Cápsula básica (solo contener el sensor) | Modelo 3D v1 en Fusion 360 (113 × 116 × 76 mm) | Cápsula con encajes y tamaño ajustado |
+| **Información entregada** | Color de riesgo general | Índice UV numérico + color + recomendación | Igual a v2, validada con usuarios |
+| **Testing** | — | Pruebas técnicas del equipo | Pruebas con 5+ usuarios |
 
 ---
 
-## Evolución del Diseño
+## Evolución del diseño
 
-### Versión 1 (Iteración 1) - Concepto Inicial
-**Fecha:** [XX/XX/2025]  
-**Estado:** Prototipo alpha - Prueba de concepto
+### Versión 1 (Iteración 1) – Concepto inicial
+**Fecha:** septiembre 2026 (Avance 1)
+**Estado:** concepto / propuesta
 
-**Características:**
-- [Descripción breve]
-- Problemas principales identificados
-- Aprendizajes clave
+- Sensor UV fijo en un poste: los niños debían acercarse para consultar el nivel.
+- Cápsula básica cuya única función era contener el sensor.
+- Comunicación cualitativa: un color asociado a un riesgo general.
 
-### Versión 2 (Iteración 2) - Primera Mejora
-**Fecha:** [XX/XX/2025]  
-**Estado:** Prototipo funcional mejorado
+### Versión 2 (Iteración 2) – Prototipo funcional
+**Fecha:** 14/10/2026 – 27/10/2026 (Avance 2)
+**Estado:** prototipo funcional, presentado el 19/10/2026
 
 **Mejoras implementadas:**
-- [Mejora 1]
-- [Mejora 2]
+- Prototipo electrónico real: ESP32 + sensor GUVA-S12SD + semáforo LED.
+- Medición cuantitativa: el voltaje del sensor se convierte a **índice UV** y cada color corresponde a un rango de la **escala OMS**.
+- Mensaje de recomendación por nivel (de "se puede salir con tranquilidad" a "no se puede salir").
+- Lectura estable: promedio de 64 muestras, suavizado y confirmación de 4 lecturas antes de cambiar de color.
+- Avisos al celular por **Telegram** y comando `/estado`.
+- Propuesta de dispositivo portátil, que se pueda instalar y retirar del poste.
+- Primer modelo 3D del encapsulado en Fusion 360.
 
 **Problemas pendientes:**
-- [Problema 1]
-- [Problema 2]
+- Calibración aproximada (tabla típica del sensor, no verificada con una referencia oficial).
+- Depende de una red WiFi de 2,4 GHz (en la demo, el hotspot de un celular).
+- Encapsulado sin encajes ni tornillos y de tamaño provisorio.
+- Falta probar con usuarios reales.
 
-### Versión 3 (Iteración 3) - Versión Final
-**Fecha:** [XX/XX/2025]  
-**Estado:** Prototipo de alta resolución
+Detalle de cada versión intermedia en [`iteracion_2/README.md`](iteracion_2/README.md).
 
-**Mejoras finales:**
-- [Mejora 1]
-- [Mejora 2]
-
-**Resultado:**
-- Sistema robusto y probado
-- Listo para piloto en terreno
+### Versión 3 (Iteración 3) – Versión final
+**Fecha:** [Avance 3]
+**Estado:** planificada. Ver [`iteracion_3/README.md`](iteracion_3/README.md).
 
 ---
 
-## Justificación de Cambios
+## Justificación de cambios
 
 ### Hardware
 **De v1 a v2:**
-- Cambio: [Descripción]
-- Razón: [Justificación técnica]
-- Impacto: [Mejora cuantitativa]
+- Cambio: del concepto a un circuito real con ESP32, sensor GUVA-S12SD y semáforo LED.
+- Razón: el ESP32 tiene WiFi integrado, lo que permite enviar avisos sin agregar módulos.
+- Impacto: el dispositivo mide, muestra y avisa en tiempo real.
 
-**De v2 a v3:**
-- Cambio: [Descripción]
-- Razón: [Justificación técnica]
-- Impacto: [Mejora cuantitativa]
+**Dentro de v2 (protoboard → conexión directa):**
+- Cambio: se intentó armar en protoboard y se volvió a la conexión directa con cables hembra-hembra.
+- Razón: el ESP32 deja solo una columna libre por lado, los módulos quedaban parados y frágiles, y hubo fallas de GND (lectura falsa de UV 4 a oscuras y semáforo apagado).
+- Impacto: la conexión directa funcionó de forma confiable para la presentación.
 
 ### Software
 **De v1 a v2:**
-- [Cambios principales]
-
-**De v2 a v3:**
-- [Cambios principales]
+- De un color de riesgo general a un **índice UV numérico** con rangos OMS y mensajes de recomendación.
+- Avisos remotos por Telegram ejecutándose en un núcleo separado, para que el semáforo nunca se trabe.
+- Ajuste de la comunicación con Telegram (consulta cada 10 s, espera de 15 s) tras errores con el hotspot.
 
 ### Diseño 3D
 **De v1 a v2:**
-- [Cambios en encapsulado]
-
-**De v2 a v3:**
-- [Cambios finales]
+- De una cápsula básica a una caja con apertura para el semáforo, bandeja para el ESP32, agujero para el sensor en la tapa, ventilación y salida de cable.
 
 ---
 
-## Incorporación de Feedback
+## Decisiones técnicas
 
-### Feedback del Avance #1 → Cambios en v2
-1. [Comentario profesor/ayudante]
-   - Acción tomada: [Descripción]
-
-### Feedback del Avance #2 → Cambios en v3
-1. [Comentario profesor/ayudante]
-   - Acción tomada: [Descripción]
-
-### Feedback de Usuarios → Cambios en v3
-1. [Comentario común de usuarios]
-   - Acción tomada: [Descripción]
-
----
-
-## Métricas de Mejora
-
-| Métrica | v1 | v2 | v3 | Mejora Total |
-|---------|----|----|----| -------------|
-| Tiempo respuesta (ms) | 500 | 200 | 100 | ↓80% |
-| Consumo (mA) | 250 | 180 | 120 | ↓52% |
-| Tasa de errores (%) | 15 | 5 | 1 | ↓93% |
-| Satisfacción usuario (1-5) | 3.0 | 3.8 | 4.5 | ↑50% |
+| Decisión | Alternativa descartada | Motivo |
+|----------|------------------------|--------|
+| ESP32 como microcontrolador | Arduino UNO | El ESP32 tiene WiFi integrado y trabaja a 3,3 V, igual que el sensor |
+| Sensor en el pin D34 (ADC1) | Pines del ADC2 | El ADC2 no funciona con el WiFi encendido |
+| 5 niveles OMS con 3 luces (parpadeo para 8–10 y 11+) | Solo 3 niveles | Respetar la escala oficial de la OMS con el semáforo disponible |
+| Promedio de 64 muestras + suavizado + confirmación de 4 lecturas | Lectura única | Evitar saltos y parpadeos cuando el valor está en un límite |
+| Avisos por Telegram | App propia, Blynk, ntfy | Gratis, funciona en iPhone y Android, envía notificaciones, permite grupos y responde comandos, sin programar una app |
+| Internet en una tarea del núcleo 0 | Todo en el `loop` | Las peticiones HTTPS tardan 1–2 s; así el semáforo nunca se traba |
+| Consultar Telegram cada 10 s | Cada 3 s | Errores 429/-11 con el hotspot del celular |
+| Conexión directa con cables hembra-hembra | Protoboard | El ESP32 tapaba casi toda la protoboard, los módulos quedaban frágiles y hubo fallas de GND |
+| Credenciales fuera del repositorio | Dejarlas en el código | El repositorio es público y el token permite controlar el bot |
 
 ---
 
-## Lecciones Aprendidas
+## Incorporación de feedback
+
+### Feedback del Avance #1 → cambios en v2
+1. [Comentario del profesor/ayudante]
+   - Acción tomada: [completar]
+
+### Feedback de la presentación del 19/10 → cambios en v3
+1. [Comentario del profesor/ayudante]
+   - Acción tomada: [completar]
+
+### Conversación con el profesor sobre energía
+- Se evaluará incluir **energía solar**. Por eso la caja v1 se dejó más grande de lo necesario, para ajustarla cuando se defina la parte eléctrica.
+
+---
+
+## Métricas de mejora
+
+| Métrica | v1 | v2 | Cómo se midió |
+|---------|----|----|---------------|
+| Niveles de riesgo distinguibles | 1 color general | 5 niveles OMS | Diseño del código |
+| Intervalo de medición | — | 0,5 s | Parámetro del código |
+| Tiempo máximo de respuesta a `/estado` | — | ≤ 10 s | Intervalo de consulta a Telegram |
+| Satisfacción de usuarios (1–5) | — | [pendiente] | Testing con usuarios (Avance 3) |
+
+---
+
+## Lecciones aprendidas
 
 ### Técnicas
-- [Lección 1]
-- [Lección 2]
+- El GND común entre todos los módulos es indispensable: sin él, la lectura del sensor queda "flotando" y da valores falsos.
+- En el ESP32, las entradas analógicas usadas con WiFi deben estar en el ADC1 (por ejemplo, D34).
+- Bajo techo el sensor marca cerca de 0 porque el vidrio bloquea casi todo el UV; las pruebas deben hacerse al aire libre o con una linterna UV de 365 nm.
+- Los servicios en la nube (Telegram) tienen límites de consultas: hay que espaciar las peticiones.
 
-### De Proceso
-- [Lección 1]
-- [Lección 2]
-
-### De Trabajo en Equipo
-- [Lección 1]
-- [Lección 2]
+### De proceso
+- Probar primero la versión más simple (conexión directa) y cambiar una sola cosa a la vez facilitó encontrar los errores.
+- Guardar siempre una copia del código que funciona antes de agregar funciones nuevas (WiFi).
+- No subir credenciales (WiFi, token) al repositorio público.
