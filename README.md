@@ -11,10 +11,9 @@ Sistema IoT que mide la radiación ultravioleta en el patio de un colegio, la mu
 
 | Integrante | Rol | GitHub |
 |------------|-----|--------|
-| [Nombre 1] | Código (firmware, servidor y panel web) y esquema electrónico | [@usuario] |
-| Benito Díaz | [Rol] | @benito-diaz |
-| [Nombre 3] | [Rol] | [@usuario] |
-| [Nombre 4] | [Rol] | [@usuario] |
+| Benjamín Retamal | Código (firmware, servidor y panel web), esquema electrónico y modelo 3D | [@BenjaRetamal](https://github.com/BenjaRetamal) |
+| Benito Díaz | [completar rol] | [@benito-diaz](https://github.com/benito-diaz) |
+| Max Cornejo | [completar rol] | [completar usuario] |
 
 ---
 

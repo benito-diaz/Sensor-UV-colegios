@@ -2,24 +2,38 @@
 
 Protocolo en [`protocolo_pruebas.md`](protocolo_pruebas.md). Pruebas técnicas del Avance 2 en [`pruebas_tecnicas.md`](pruebas_tecnicas.md).
 
-> Los campos `[completar]` se llenan con los datos reales de las pruebas (CSV del panel y log del Monitor Serie, procesados con `testing/datos/analizar_datos.py`). No se inventan valores.
+> Todos los valores salen de los datos reales del 22-11-2026. Las pruebas que no se alcanzaron a hacer quedan marcadas como pendientes.
 
 ---
 
 ## Resumen de resultados
 
+Datos: `testing/datos/lecturas_uv_2026-11-22.csv` (200 lecturas descargadas de `/api/exportar.csv`), prototipo con el hotspot de un iPhone, 22-11-2026 entre 17:18 y 20:06, bajo techo y de tarde (sin radiación UV).
+
 | Prueba | Métrica | Resultado | Criterio | ¿Cumple? |
 |---|---|---|---|---|
-| P1 Captura continua | Lecturas recibidas / esperadas | [completar] % ([n] de [m]) | ≥ 95 % | [ ] |
-| P1 Persistencia | Lecturas antes del reinicio siguen en la base | [sí/no] | sí | [ ] |
-| P1 Huecos | Hueco más largo | [completar] s | ≤ 60 s (salvo reinicio) | [ ] |
-| P2 Tasa de éxito | Respuestas 201 | [completar] % | ≥ 95 % | [ ] |
-| P2 Latencia | Media / máxima | [completar] / [completar] ms | media < 3 s | [ ] |
-| P3 Oscuridad | Índice con el sensor tapado | [completar] ([mV] mV) | ≤ 0,5 | [ ] |
-| P4 Exactitud | Error medio vs MeteoChile | [completar] puntos | ≤ 2 | [ ] |
-| P5 Respuesta | Semáforo / panel / Telegram | [ ] s / [ ] s / [ ] s | < 3 / 20 / 30 s | [ ] |
-| P6 Autonomía | Horas con batería | [completar] h | ≈ 7 h estimadas | [ ] |
+| P1 Captura continua | Lecturas recibidas / esperadas (1 cada 10 s) | **96,9 %** (156 de 161, de 19:39:21 a 20:06:05, 26,7 min) | ≥ 95 % | ✅ |
+| P1 Intervalo | Mediana / promedio entre lecturas | **10,0 s / 10,35 s** | 10 s | ✅ |
+| P1 Huecos | Hueco más largo en la prueba larga | **27 s** (19:49:24) | ≤ 60 s | ✅ |
+| P1 Persistencia | Lecturas guardadas antes de apagar el equipo siguen en la base | **Sí**: los 200 registros (id 1 a 200, sin saltos) siguen después de apagar y volver a encender el equipo (cortes de 17:24 a 18:55 y de 18:59 a 19:39) | sí | ✅ |
+| P2 Tasa de éxito | Respuestas 201 | Sin log completo del Monitor Serie; la base no muestra lecturas perdidas fuera del hueco de 27 s | ≥ 95 % | ⚠️ parcial |
+| P2 Latencia | Tiempo de un POST | **1.968 ms** (una medición en el Monitor Serie, 17:18) | media < 3 s | ✅ (1 muestra) |
+| P3 Cero sin UV | Índice sin radiación (bajo techo, de noche) | **0,52 (142 mV)**, nivel BAJO, verde | ≤ 0,5 | ❌ por 0,02 → ver F5 |
+| P4 Exactitud | Error vs MeteoChile | Pendiente (requiere sol de mediodía) | ≤ 2 puntos | — |
+| P5 Respuesta | Semáforo / panel / Telegram | Pendiente de cronometrar | < 3 / 20 / 30 s | — |
+| P6 Autonomía | Horas con batería | Pendiente (falta descargar la batería por completo) | ≈ 7 h estimadas | — |
 | P7 Seguridad API | Clave mala / fuera de rango / texto | 401 / 400 / 400 | 401 / 400 / 400 | ✅ |
+
+### Cómo se calcularon
+- `python3 testing/datos/analizar_datos.py testing/datos/lecturas_uv_2026-11-22.csv`, considerando solo el tramo continuo de 19:39:21 a 20:06:05 para P1.
+- Esperadas = duración / 10 s + 1. El intervalo real es un poco mayor que 10 s (10,35 s en promedio) porque cada envío espera la respuesta del servidor y la consulta a Telegram comparte la misma tarea; por eso el porcentaje queda bajo 100 % aunque solo falten ~2 lecturas en el hueco de 27 s.
+
+### Todas las sesiones del día
+| Tramo | Lecturas | Observación |
+|---|---|---|
+| 17:18:55 – 17:24:04 | 31 de 31 (100 %) | Alimentado por USB del computador; primer envío 201 en 1.968 ms |
+| 18:55:22 – 18:59:40 | 13 | Prueba con batería; incluye la falla F4 (GND suelto) |
+| 19:39:21 – 20:06:05 | 156 de 161 (96,9 %) | Prueba larga, sin tocar el equipo |
 
 ---
 
@@ -37,7 +51,9 @@ Repetir con la URL de Railway el día de la demo.
 
 ---
 
-## P4 – Comparación con MeteoChile
+## P4 – Comparación con MeteoChile (pendiente)
+
+Las pruebas del 22-11 fueron bajo techo y de tarde, sin radiación UV. Esta tabla se completa con mediciones al sol de mediodía.
 
 | Hora | Medidor (promedio 5 min) | MeteoChile | Diferencia |
 |---|---|---|---|
@@ -65,14 +81,26 @@ Repetir con la URL de Railway el día de la demo.
 - **Causa:** el servidor recalculaba el nivel con cada lectura, sin la confirmación de 4 lecturas que usa el semáforo.
 - **Solución:** el ESP32 envía el **mismo nivel confirmado** que muestra el semáforo, y el servidor lo usa. Así el panel, el semáforo y Telegram coinciden.
 
-### F4 – [completar si aparece alguna falla en P1–P6]
+### F4 – GND del sensor suelto: lectura imposible de 2.827 mV (Avance 3, real)
+- **Síntoma:** a las 18:59:31 se guardó una lectura con **índice 19,41 y 2.827 mV**, mientras el sensor estaba en interior. La lectura siguiente (18:59:40) volvió a 0,54 y 142 mV.
+- **Causa:** el cable GND del sensor se desconectó; sin tierra, la entrada D34 queda "flotando" y lee un voltaje cualquiera (la misma causa de F1).
+- **Lo que funcionó bien:** el **nivel guardado siguió en BAJO**, el **semáforo no cambió** y **Telegram no mandó una alerta falsa**, porque el nivel solo cambia tras 4 lecturas seguidas y la falla duró menos que eso.
+- **Lo que quedó mal:** el valor 19,41 se guardó y el panel lo mostró como "máximo de hoy".
+- **Solución propuesta:** que el servidor rechace lecturas sobre 2.000 mV (el sensor entrega ≈ 1,2 V con índice 11; más de 2 V solo puede ser una falla eléctrica). El dato real no se borró de la base: queda como evidencia de la falla.
+
+### F5 – El cero del sensor marca 0,52 sin radiación (Avance 3, real)
+- **Síntoma:** bajo techo y de noche el sensor entrega **142 mV constantes**, que la tabla convierte en índice **0,52**.
+- **Causa:** la tabla `TABLA_MV` usa valores típicos (50 mV para índice 0), pero este sensor y el ADC del ESP32 tienen un desfase de ≈ 92 mV.
+- **Efecto:** ninguno en la decisión (sigue en BAJO, luz verde), pero el índice mínimo no llega a 0.
+- **Solución propuesta:** calibrar el cero cambiando el primer valor de `TABLA_MV` a 142 mV, y ajustar el resto con la comparación contra MeteoChile (P4).
 
 ---
 
 ## Mejoras propuestas (fundamentadas)
-1. **Calibración:** ajustar `TABLA_MV` con las mediciones de P4 (la tabla actual es típica del sensor, no medida).
-2. **Energía:** dormir el ESP32 de noche y operar solo en horario escolar; el balance estimado (0,55 W de consumo contra ≈ 0,9 W de panel solo en horas de sol) no alcanza para 24 h.
-3. **Conectividad:** usar la red WiFi del colegio (2,4 GHz, sin usuario) y guardar lecturas en memoria cuando no hay Internet para enviarlas después.
+1. **Calibración:** fijar el cero en 142 mV (F5) y ajustar `TABLA_MV` con las mediciones de P4 (la tabla actual es típica del sensor, no medida).
+2. **Filtro de fallas eléctricas:** rechazar en el servidor lecturas sobre 2.000 mV (F4).
+3. **Energía (recomendación del profesor):** operar en horario escolar: despertar antes de cada recreo, avisar, mostrar el semáforo durante el recreo y dormir el ESP32 (deep sleep) el resto del tiempo. Con WiFi siempre encendido el balance estimado (0,55 W de consumo contra ≈ 0,9 W de panel solo en horas de sol) no alcanza para 24 h.
+4. **Conectividad:** usar la red WiFi del colegio (2,4 GHz, sin usuario) y guardar lecturas en memoria cuando no hay Internet para enviarlas después.
 
 ---
 
@@ -82,10 +110,10 @@ Repetir con la URL de Railway el día de la demo.
 
 | Lo que el problema necesita | Evidencia del sistema |
 |---|---|
-| Medir en el lugar, no un pronóstico general de la ciudad | P1: [n] lecturas reales del patio en [t] min, guardadas en la nube |
-| Saber cuándo el riesgo es alto | Alerta con UV ≥ 6; P5: aviso en [ ] s |
+| Medir en el lugar, no un pronóstico general de la ciudad | P1: 200 lecturas reales guardadas en la nube el 22-11; 96,9 % de captura en la prueba de 26,7 min |
+| Saber cuándo el riesgo es alto | Alerta con UV ≥ 6 en panel, semáforo y Telegram; F4 muestra que una lectura falsa no dispara alertas |
 | Saber qué hacer | Recomendación por nivel adaptada al colegio (recreo, Ed. Física) |
-| Planificar la jornada | Máximo del día a las [hh:mm]; [ ] min con protección necesaria; [ ] alertas |
-| Confiar en el valor | P4: diferencia de [ ] puntos con MeteoChile |
+| Planificar la jornada | El panel calcula máximo del día y su hora, minutos con protección y alertas (las pruebas fueron sin sol: todo el tiempo en BAJO) |
+| Confiar en el valor | Pendiente P4 con MeteoChile; F5 identifica el desfase del cero a corregir |
 
-**Conclusión:** [completar con los datos: por ejemplo, "el día X el medidor registró un máximo de N a las HH:MM y estuvo M minutos sobre el nivel moderado; con el panel, el personal podría haber movido el recreo de las HH:MM a la sombra"].
+**Conclusión:** la cadena completa (sensor → ESP32 → Railway → Aiven → panel y Telegram) funcionó de forma continua: 96,9 % de las lecturas llegaron en la prueba larga, no se perdió ningún dato guardado al apagar el equipo y una falla de cableado no generó alertas falsas. Falta validar la exactitud con sol real (P4) y corregir el cero del sensor (F5) antes de usarlo en un colegio.
