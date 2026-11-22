@@ -3,7 +3,7 @@
 Sistema IoT que mide la radiación ultravioleta en el patio de un colegio, la muestra con un **semáforo de colores** según el **Índice UV de la OMS**, avisa al celular por **Telegram** y guarda cada lectura en una **base de datos en la nube** con un **panel web** público. Así el personal del colegio puede decidir en el momento cómo proteger a los niños en recreos y clases de Educación Física.
 
 **Curso:** TEI201 – Taller de Diseño en Ingeniería · Universidad Adolfo Ibáñez · 2026
-**Panel web en vivo:** [completar con el link de Railway, por ejemplo `https://sensor-uv-web-production.up.railway.app`]
+**Panel web en vivo:** https://sensor-uv-web-production.up.railway.app
 
 ---
 
