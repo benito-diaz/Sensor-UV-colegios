@@ -1,28 +1,21 @@
 # Iteración 3 – Versión final (Avance 3)
 
-**Fecha:** [completar]
-**Estado:** planificada
+**Fecha:** 22-11-2026 (presentación 23-11-2026)
+**Estado:** prototipo IoT completo
 
-## Mejoras planificadas
+## Qué se agregó respecto de la v2
 
-### Medición
-- [ ] Calibrar el sensor: registrar lecturas al aire libre a distintas horas y compararlas con el índice UV publicado por **MeteoChile** para Santiago; ajustar la tabla `TABLA_MV` del código.
+| Área | v2 (Avance 2) | v3 (Avance 3) |
+|---|---|---|
+| Datos | Solo en tiempo real (Monitor Serie y Telegram) | Cada lectura se guarda en PostgreSQL (Aiven) cada 10 s |
+| Visualización | Monitor Serie | Panel web público (Railway) con gráfico, tabla, CSV |
+| Información | Nivel y recomendación | + alerta UV ≥ 6, máximo del día y su hora, tiempo con protección, alertas del día, máximos de 7 días |
+| Energía | USB del computador / power bank | Panel solar 5,5 V + LiPo Rider Pro + batería 1200 mAh |
+| Encapsulado | Caja v1 sin fijaciones | Carcasa v4 en ASA con insertos, junta TPU, techo solar y soporte de pared |
+| Firmware | `v2.3_telegram_final.ino` | `software/src/main.ino` (+ `enviarLecturaNube`) |
 
-### Hardware y energía
-- [ ] Definir con el profesor la alimentación (posible **panel solar** + batería).
-- [ ] Fijar las conexiones dentro de la cápsula para que no se suelten.
-
-### Encapsulado
-- [ ] Ajustar el tamaño de la caja una vez definida la parte eléctrica.
-- [ ] Agregar encajes o tornillos para armar y desarmar.
-- [ ] Sistema para instalar y retirar el dispositivo del poste.
-- [ ] Protección contra lluvia sin bloquear la ventana del sensor.
-
-### Software
-- [ ] Posibilidad de enviar los avisos a un **grupo de Telegram** del personal del colegio.
-
-### Testing
-- [ ] Pruebas con al menos **5 usuarios** (ver protocolo en `testing/README.md`).
-
-## Resultados
-[Completar al terminar la iteración]
+## Decisiones
+- **Railway + Aiven** en vez de Firebase: es la arquitectura de la guía del curso; PostgreSQL permite calcular las estadísticas con SQL en el servidor.
+- **Envío cada 10 s:** capta el paso de nubes sin llenar la base (≈ 8.600 filas al día).
+- **Se mantiene Telegram:** ya funcionaba y llega al celular aunque nadie mire el panel.
+- **El servidor recibe el nivel del semáforo:** así el panel y el semáforo nunca muestran colores distintos.

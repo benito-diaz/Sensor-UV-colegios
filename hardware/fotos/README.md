@@ -1,10 +1,12 @@
-# Fotos del Prototipo
+# Fotos del prototipo
 
-Subir aquí fotos de alta resolución del prototipo armado (vista general, conexiones al ESP32, semáforo encendido en cada color).
+Subir aquí al menos **3 fotos** del prototipo ensamblado (requisito del Avance 3):
 
-Fotos de las pruebas durante el desarrollo: ver [`testing/evidencias/`](../../testing/evidencias/).
+| Archivo sugerido | Qué mostrar |
+|---|---|
+| `01_frente.jpg` | Frente: semáforo encendido |
+| `02_lateral_y_techo.jpg` | Costado y techo: panel solar y cápsula del sensor |
+| `03_interior_abierto.jpg` | Con la tapa frontal abierta: ESP32, LiPo Rider, batería, cables |
+| `04_conexiones_detalle.jpg` | Detalle de las conexiones al ESP32 |
 
-| Archivo | Descripción |
-|---------|-------------|
-| [completar] | Prototipo v2 con conexión directa |
-| [completar] | Semáforo encendido en verde / amarillo / rojo |
+Consejos: buena luz, fondo limpio, sin datos personales visibles.

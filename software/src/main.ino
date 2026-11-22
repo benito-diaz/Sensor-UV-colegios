@@ -1,6 +1,6 @@
 /*
-  Medidor de radiación UV con semáforo
-  ------------------------------------
+  Medidor de radiación UV con semáforo + Telegram + nube (versión 3, Avance 3)
+  ---------------------------------------------------------------------------
   Placa:    ESP32 (DevKit / "ESP32 Dev Module")
   Sensor:   GUVA-S12SD (módulo Keyes) -> salida analógica
   Salida:   Mini semáforo LED (pines R, Y, G, GND)
@@ -24,6 +24,13 @@
   Monitor Serie: 115200 baudios. Muestra un mensaje cada 15 s
   o apenas cambia el color del semáforo.
 
+  Nube (NUEVO en v3):
+    - Cada 10 s manda {"dispositivo","indice_uv","milivoltios","nivel"} por HTTPS
+      al servidor en Railway, que lo guarda en PostgreSQL (Aiven).
+    - La página web del servidor muestra el estado, alertas, estadísticas y gráficos.
+    - En el Monitor Serie aparece "[Nube] POST -> 201" cuando la lectura quedó guardada,
+      con la latencia y el conteo de envíos OK/fallidos (sirve para el testing).
+
   Celular (Telegram):
     - Avisa cuando el medidor se conecta y cada vez que cambia el nivel UV.
     - Escribe /estado al bot para ver la radiación actual.
@@ -33,12 +40,16 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
+#include <ArduinoJson.h>   // Library Manager: "ArduinoJson" de Benoit Blanchon (v7)
 
 // ================== CONFIGURA ESTO ==================
 const char* WIFI_NOMBRE      = "NOMBRE_DE_TU_RED";    // nombre exacto del WiFi o hotspot
 const char* WIFI_CLAVE       = "CLAVE_DE_TU_RED";     // contraseña del WiFi
 const char* TELEGRAM_TOKEN   = "PEGA_AQUI_EL_TOKEN";  // te lo da @BotFather
 const char* TELEGRAM_CHAT_ID = "PEGA_AQUI_TU_ID";     // te lo dice el bot la primera vez
+const char* SERVER_URL  = "https://TU-APP.up.railway.app/api/lecturas";  // URL de Railway + /api/lecturas
+const char* API_KEY     = "LA_MISMA_CLAVE_QUE_EN_RAILWAY";              // variable API_KEY de Railway
+const char* DISPOSITIVO = "uv-colegio-1";                              // nombre de este medidor
 // ====================================================
 
 // ---------------- Pines ----------------
@@ -57,6 +68,9 @@ const uint32_t INTERVALO_LECTURA_MS = 500;   // cada cuánto se mide
 const uint32_t INTERVALO_MENSAJE_MS = 15000; // cada cuánto se muestra el mensaje (15 s)
 const float    SUAVIZADO            = 0.3;   // 0..1 (más bajo = más suave)
 const int      LECTURAS_PARA_CAMBIO = 4;     // lecturas seguidas antes de cambiar color
+// Envío a la nube cada 10 s: la radiación cambia en minutos (sol) o segundos (nubes);
+// 10 s capta el paso de una nube y son solo ~8.600 filas al día (muy poco para 1 GB de Aiven).
+const uint32_t INTERVALO_ENVIO_MS   = 10000;
 
 // Tabla de calibración típica del GUVA-S12SD: voltaje de salida (mV) para cada índice UV.
 // Índice:             0    1    2    3    4    5    6    7    8    9    10    11
@@ -92,7 +106,7 @@ volatile bool  primeraLectura = true;
 volatile Nivel nivelActual = BAJO;
 Nivel nivelCandidato = BAJO;
 int   contadorCandidato = 0;
-int   ultimoMv = 0;
+volatile int ultimoMv = 0;
 
 uint32_t tUltimaLectura = 0;
 uint32_t tUltimoMensaje = 0;
@@ -176,6 +190,7 @@ void mostrarMensaje() {
 }
 
 // ---------------- Internet: WiFi + Telegram ----------------
+// Si no quieres usar Telegram, deja TELEGRAM_TOKEN como "PEGA_AQUI_EL_TOKEN": se salta Telegram.
 long ultimoUpdateId = 0;  // último mensaje de Telegram ya leído
 
 String urlEncode(const String& texto) {
@@ -226,6 +241,10 @@ String textoEstado() {
   return t;
 }
 
+bool tokenConfigurado() {
+  return String(TELEGRAM_TOKEN).indexOf("PEGA") < 0;
+}
+
 bool chatIdConfigurado() {
   return String(TELEGRAM_CHAT_ID).indexOf("PEGA") < 0;
 }
@@ -260,6 +279,46 @@ void revisarTelegram() {
   }
 }
 
+// ---------------- Nube: envío de la lectura a Railway ----------------
+uint32_t enviosOk = 0, enviosFallidos = 0;  // contadores para el protocolo de pruebas
+
+bool urlConfigurada() {
+  return String(SERVER_URL).indexOf("TU-APP") < 0;
+}
+
+// Arma el JSON con ArduinoJson y lo manda por POST con HTTPS.
+// El servidor responde 201 si la guardó, 401 si la API_KEY no coincide, 400 si el JSON está mal.
+bool enviarLecturaNube() {
+  WiFiClientSecure cliente;
+  cliente.setInsecure();  // cifra, pero no verifica el certificado (aceptable en el prototipo)
+  HTTPClient http;
+  http.setTimeout(15000);
+  if (!http.begin(cliente, SERVER_URL)) return false;
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("x-api-key", API_KEY);
+
+  JsonDocument doc;
+  doc["dispositivo"] = DISPOSITIVO;
+  doc["indice_uv"]   = round(uvSuavizado * 100) / 100.0;  // 2 decimales
+  doc["milivoltios"] = (int)ultimoMv;
+  doc["nivel"]       = NOMBRE_NIVEL[nivelActual];          // el mismo nivel que muestra el semáforo
+  String cuerpo;
+  serializeJson(doc, cuerpo);
+
+  uint32_t t0 = millis();
+  int codigo = http.POST(cuerpo);
+  uint32_t latencia = millis() - t0;
+  http.end();
+
+  bool ok = (codigo == 201);
+  if (ok) enviosOk++; else enviosFallidos++;
+  Serial.printf("[Nube] POST %s -> %d (%lu ms) | OK: %lu, fallidos: %lu\n", cuerpo.c_str(), codigo,
+                (unsigned long)latencia, (unsigned long)enviosOk, (unsigned long)enviosFallidos);
+  if (codigo == 401) Serial.println("[Nube] Revisa que API_KEY sea igual a la de Railway.");
+  if (codigo < 0)    Serial.println("[Nube] No llego al servidor: revisa SERVER_URL (https://... /api/lecturas).");
+  return ok;
+}
+
 // Corre en paralelo al semáforo, así las luces nunca se traban esperando a Internet
 void tareaInternet(void* parametro) {
   bool estabaConectado = false;
@@ -267,6 +326,7 @@ void tareaInternet(void* parametro) {
   uint32_t tInicioConexion = millis();
   uint32_t tUltimaRevision = 0;
   uint32_t tUltimoIntentoAviso = 0;
+  uint32_t tUltimoEnvio = 0;
 
   for (;;) {
     bool conectado = (WiFi.status() == WL_CONNECTED);
@@ -296,7 +356,7 @@ void tareaInternet(void* parametro) {
 
     if (conectado && !primeraLectura) {
       // Aviso al celular cuando cambia el nivel (o al conectarse por primera vez)
-      if (chatIdConfigurado() && (int)nivelActual != nivelNotificado &&
+      if (tokenConfigurado() && chatIdConfigurado() && (int)nivelActual != nivelNotificado &&
           (tUltimoIntentoAviso == 0 || millis() - tUltimoIntentoAviso > 10000)) {
         tUltimoIntentoAviso = millis();
         int nivelAEnviar = nivelActual;
@@ -306,8 +366,13 @@ void tareaInternet(void* parametro) {
           Serial.println("[Telegram] Aviso enviado al celular.");
         }
       }
-      // Revisa si le escribieron al bot cada 10 s
-      if (millis() - tUltimaRevision >= 10000) {
+      // Manda la lectura a la nube cada 10 s
+      if (urlConfigurada() && millis() - tUltimoEnvio >= INTERVALO_ENVIO_MS) {
+        tUltimoEnvio = millis();
+        enviarLecturaNube();
+      }
+      // Revisa si le escribieron al bot cada 10 s (más seguido daba error 429 de Telegram)
+      if (tokenConfigurado() && millis() - tUltimaRevision >= 10000) {
         tUltimaRevision = millis();
         revisarTelegram();
       }
@@ -343,7 +408,7 @@ void setup() {
   Serial.println();
   Serial.println("Medidor UV listo. Mensaje cada 15 segundos o al cambiar de color.");
 
-  // WiFi + Telegram en una tarea aparte (núcleo 0)
+  // WiFi + Telegram + nube en una tarea aparte (núcleo 0)
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_NOMBRE, WIFI_CLAVE);
   Serial.print("[WiFi] Conectando a ");

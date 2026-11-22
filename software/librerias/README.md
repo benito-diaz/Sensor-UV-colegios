@@ -1,20 +1,20 @@
-# Librerías
+# Librerías y versiones
 
-## Librerías estándar
+## Firmware (Arduino IDE)
 
-El proyecto **no usa librerías externas**. Todas vienen incluidas en el paquete **esp32 by Espressif Systems** que se instala desde el Boards Manager de Arduino IDE.
+| Librería | Versión | Cómo se instala |
+|---|---|---|
+| esp32 by Espressif Systems (incluye `WiFi.h`, `WiFiClientSecure.h`, `HTTPClient.h`, FreeRTOS) | 3.3.x | Boards Manager |
+| ArduinoJson (Benoit Blanchon) | 7.x | Library Manager |
 
-## Librerías personalizadas o modificadas
+## Servidor (Node.js ≥ 18)
 
-Ninguna.
+Definidas en `../servidor/package.json` y fijadas en `package-lock.json`:
 
-## Dependencias completas
+| Paquete | Versión |
+|---|---|
+| express | ^4.21.0 |
+| pg | ^8.13.0 |
+| dotenv | ^16.4.5 |
 
-| Librería / herramienta | Versión | Fuente | Obligatoria |
-|------------------------|---------|--------|-------------|
-| Paquete esp32 (Espressif) | 3.3.12 | Arduino IDE → Boards Manager | ✅ |
-| WiFi | incluida en el paquete esp32 | ESP32 Core | ✅ |
-| WiFiClientSecure | incluida en el paquete esp32 | ESP32 Core | ✅ |
-| HTTPClient | incluida en el paquete esp32 | ESP32 Core | ✅ |
-| Driver CP210x (Windows) | v6.7.6 | silabs.com, "CP210x Windows Drivers" | ✅ si el PC no reconoce el ESP32 |
-| App Telegram + bot de @BotFather | — | App Store / Google Play | ✅ para los avisos al celular |
+Panel web: Chart.js 4.4.1 desde jsDelivr (`https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js`).

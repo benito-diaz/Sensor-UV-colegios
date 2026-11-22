@@ -1,0 +1,16 @@
+item,cantidad,componente,especificacion,proveedor_referencia,precio_unitario_clp,precio_total_clp,nota
+1,1,ESP32 DevKit 30 pines,WROOM-32 WiFi+BT USB CP2102,MCI Electronics (Tarjeta de Desarrollo ESP32 de 30 Pines),8990,8990,precio referencial web 22-11-2026
+2,1,Sensor UV GUVA-S12SD,modulo Keyes salida analogica 240-370 nm,[completar],[completar],[completar],completar con boleta
+3,1,Modulo semaforo LED,3 LED R/Y/G con resistencias (V1224),MCI Electronics (Modulo LED Semaforo 3 Colores),3990,3990,precio referencial web 22-11-2026
+4,1,Seeed LiPo Rider Pro,cargador solar + elevador USB 5 V,[completar],[completar],[completar],completar con boleta
+5,1,Bateria LiPo,3.7 V 1200 mAh 603450 con JST,[completar],[completar],[completar],referencia: MCI bateria LiPo 3.7 V 1000 mAh (503450) $12.990
+6,1,Panel solar,5.5 V 170 mA 100 x 80 mm,MCI Electronics (Panel Solar 5.5V 170mA 100x80mm),14990,14990,precio referencial web 22-11-2026
+7,1,Cable USB-A a micro-USB,de datos,[completar],[completar],[completar],
+8,7,Cables Dupont hembra-hembra,20 cm,[completar],[completar],[completar],
+9,6,Inserto termico M2.5,diam. ext. 3.5 x 4 mm (ESP32 4 + semaforo 2),[completar],[completar],[completar],
+10,18,Inserto termico M3,diam. ext. 5 x 4 mm (tapa 4 + LiPo 4 + techo 4 + traba 2 + sensor 4),[completar],[completar],[completar],
+11,6,Tornillo M2.5 x 8,cabeza cilindrica,[completar],[completar],[completar],
+12,18,Tornillo M3 x 8-10,cabeza avellanada (tapa) y cilindrica,[completar],[completar],[completar],
+13,1,Filamento ASA (blanco/negro/gris),~245 cm3 impresos (cuerpo tapas techo soporte),[completar],[completar],[completar],volumen medido en los STL v4
+14,1,Filamento PETG gris,~0.7 cm3 (traba),[completar],[completar],[completar],
+15,1,Filamento TPU 95A,~2.0 cm3 (junta),[completar],[completar],[completar],

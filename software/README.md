@@ -2,124 +2,129 @@
 
 ## Contenido
 
-| Carpeta | Contenido |
-|---------|-----------|
-| `src/` | Código fuente del ESP32 (`main.ino`) |
-| `librerias/` | Librerías utilizadas (todas incluidas en el paquete del ESP32) |
-| `docs/` | Manual de instalación, manual de operación y solución de problemas |
+| Carpeta / archivo | Contenido |
+|---|---|
+| `src/main.ino` | Firmware del ESP32 v3: semáforo + Telegram + envío a la nube |
+| `servidor/` | Servidor Express + panel web (se despliega en Railway; base en Aiven) |
+| `docs/captura_y_datos.md` | Captura, almacenamiento, dashboard e información generada |
+| `docs/capturas/` | Capturas del panel funcionando |
+| `librerias/` | Dependencias y versiones |
+
+Versiones anteriores del firmware en [`../iteraciones/iteracion_2/codigo/`](../iteraciones/iteracion_2/codigo/).
 
 ---
 
-## Stack tecnológico
+## Arquitectura
 
-**Plataforma:** ESP32 (placa ESP32 DevKit, "ESP32 Dev Module")
-**Lenguaje:** C/C++ (Arduino)
-**IDE:** Arduino IDE 2.3.10
-**Paquete de placas:** esp32 by Espressif Systems 3.3.12
-**Librerías principales** (incluidas en el paquete, no hay que instalarlas):
-- `WiFi.h` – conexión a la red WiFi
-- `WiFiClientSecure.h` – conexión segura (HTTPS)
-- `HTTPClient.h` – peticiones a la API de Telegram
+```
+                 núcleo 1 (loop)                         núcleo 0 (tareaInternet)
+ sensor ─▶ leerMilivoltios() ─▶ milivoltiosAIndiceUV()     ├─ reconectar WiFi (cada 20 s si se cae)
+           (64 muestras)         (tabla + interpolación)   ├─ enviarLecturaNube()  cada 10 s ──▶ Railway ─▶ Aiven
+                 │                                          ├─ aviso Telegram si cambia el nivel
+           suavizado 0,3 ─▶ actualizarNivel() (4 lecturas)  └─ revisarTelegram()    cada 10 s (/estado)
+                 │
+           mostrarNivel() ─▶ semáforo (fijo / parpadeo)
+```
+
+Las variables que comparten los dos núcleos (`uvSuavizado`, `nivelActual`, `ultimoMv`) son `volatile`. Si no hay Internet, el semáforo sigue funcionando.
+
+### Funciones del firmware
+
+| Función | Qué hace |
+|---|---|
+| `leerMilivoltios()` | Promedia 64 lecturas calibradas del ADC (`analogReadMilliVolts`) |
+| `milivoltiosAIndiceUV()` | Interpola el voltaje en `TABLA_MV` (índice 0 a 11; sobre 11 extrapola) |
+| `indiceANivel()` | Escala OMS: 0–2, 3–5, 6–7, 8–10, 11+ |
+| `actualizarNivel()` | Cambia de nivel solo tras 4 lecturas seguidas (evita parpadeos en los límites) |
+| `mostrarNivel()` | Verde, amarillo, rojo fijo, rojo 1 Hz o rojo rápido |
+| `enviarLecturaNube()` | POST HTTPS con JSON (ArduinoJson) y `x-api-key`; cuenta envíos OK/fallidos y mide la latencia |
+| `telegramGet()`, `enviarTelegram()`, `revisarTelegram()` | Avisos y comando `/estado` |
+| `tareaInternet()` | Tarea FreeRTOS del núcleo 0 que maneja WiFi, nube y Telegram |
+
+### Rutas del servidor (`servidor/server.js`)
+
+| Ruta | Uso |
+|---|---|
+| `GET /api/salud` | Comprueba la conexión con la base |
+| `POST /api/lecturas` | Guarda una lectura (requiere `x-api-key`) |
+| `GET /api/lecturas?limite=` | Últimas lecturas |
+| `GET /api/ultima` | Lectura más reciente y segundos desde que llegó |
+| `GET /api/historial?horas=` | Promedio y máximo por tramo para el gráfico |
+| `GET /api/resumen` | Máximo del día y su hora, promedio, minutos por nivel, alertas, máximos de 7 días |
+| `GET /api/exportar.csv?horas=` | Descarga de datos |
 
 ---
 
-## Instalación y configuración
+## Firmware: instalación
 
-### 1. Instalar Arduino IDE
-Descargar Arduino IDE 2 desde https://www.arduino.cc/en/software e instalar con las opciones por defecto. Aceptar la instalación de los controladores USB.
+1. **Arduino IDE 2** (https://www.arduino.cc/en/software).
+2. **File → Preferences → Additional boards manager URLs:** `https://espressif.github.io/arduino-esp32/package_esp32_index.json`
+3. **Tools → Board → Boards Manager:** instalar **esp32 by Espressif Systems**.
+4. **Tools → Manage Libraries:** instalar **ArduinoJson** (Benoit Blanchon, v7).
+5. Si el PC no muestra un puerto COM nuevo, instalar el driver **CP210x** de Silicon Labs.
+6. Abrir `src/main.ino` (aceptar si Arduino pide crear la carpeta `main`), elegir **ESP32 Dev Module** y el puerto, y **Subir**. Si se queda en `Connecting....`, mantener presionado **BOOT**.
 
-### 2. Configurar el ESP32
-1. **File → Preferences → Additional boards manager URLs:**
-   `https://espressif.github.io/arduino-esp32/package_esp32_index.json`
-2. **Tools → Board → Boards Manager**, buscar `esp32` e instalar **esp32 by Espressif Systems**.
-3. Conectar el ESP32 con un cable USB **de datos**.
-4. Si no aparece un puerto COM nuevo, instalar el driver **CP210x** de Silicon Labs ("CP210x Windows Drivers", ejecutar `CP210xVCPInstaller_x64.exe`).
-5. **Select other board and port:** placa **ESP32 Dev Module** y el puerto COM del ESP32 (por ejemplo COM3).
-
-### 3. Instalar librerías
-No hace falta: todas vienen con el paquete del ESP32.
-
-### 4. Cargar el código
-1. Abrir `src/main.ino`.
-2. Completar las credenciales (sección siguiente).
-3. Presionar **Subir (→)**. Si se queda en `Connecting....`, mantener presionado el botón **BOOT** de la placa.
-4. Abrir **Serial Monitor** a **115200 baud**.
-
----
-
-## Configuración de parámetros
-
-Al inicio de `main.ino`, en la sección `CONFIGURA ESTO`:
+### Configuración (bloque `CONFIGURA ESTO`)
 
 ```cpp
-const char* WIFI_NOMBRE      = "NOMBRE_DE_TU_RED";    // WiFi de 2,4 GHz
+const char* WIFI_NOMBRE      = "NOMBRE_DE_TU_RED";      // WiFi de 2,4 GHz (no sirve eduroam)
 const char* WIFI_CLAVE       = "CLAVE_DE_TU_RED";
-const char* TELEGRAM_TOKEN   = "PEGA_AQUI_EL_TOKEN";  // lo entrega @BotFather
-const char* TELEGRAM_CHAT_ID = "PEGA_AQUI_TU_ID";     // ID del chat que recibe los avisos
+const char* TELEGRAM_TOKEN   = "PEGA_AQUI_EL_TOKEN";    // de @BotFather (si se deja así, no usa Telegram)
+const char* TELEGRAM_CHAT_ID = "PEGA_AQUI_TU_ID";
+const char* SERVER_URL  = "https://TU-APP.up.railway.app/api/lecturas";
+const char* API_KEY     = "LA_MISMA_CLAVE_QUE_EN_RAILWAY";
+const char* DISPOSITIVO = "uv-colegio-1";
 ```
 
-> ⚠️ **No subir al repositorio** el token ni la clave real. Con el token cualquiera puede controlar el bot.
+> ⚠️ No subir al repositorio la clave del WiFi, el token de Telegram ni la API_KEY.
 
-Otros parámetros ajustables:
+### Parámetros ajustables
 
 | Constante | Valor | Qué controla |
-|-----------|-------|--------------|
-| `PIN_UV` | 34 | Pin de la señal del sensor (ADC1) |
-| `PIN_ROJO / PIN_AMARILLO / PIN_VERDE` | 25 / 26 / 27 | Pines del semáforo |
-| `PIN_VCC_SENSOR` | 32 | Pin que puede alimentar el sensor con 3,3 V |
-| `MUESTRAS_POR_LECTURA` | 64 | Lecturas promediadas en cada medición |
-| `INTERVALO_LECTURA_MS` | 500 | Cada cuánto se mide (ms) |
-| `INTERVALO_MENSAJE_MS` | 15000 | Cada cuánto se imprime el mensaje en el Monitor Serie |
-| `SUAVIZADO` | 0.3 | Peso de la lectura nueva en el promedio suavizado |
-| `LECTURAS_PARA_CAMBIO` | 4 | Lecturas seguidas necesarias para cambiar de color |
-| `TABLA_MV[]` | 12 valores | Voltaje típico del sensor para índice UV 0 a 11 |
+|---|---|---|
+| `PIN_UV` / `PIN_ROJO` / `PIN_AMARILLO` / `PIN_VERDE` | 34 / 25 / 26 / 27 | Pines |
+| `MUESTRAS_POR_LECTURA` | 64 | Muestras promediadas por lectura |
+| `INTERVALO_LECTURA_MS` | 500 | Cada cuánto se mide |
+| `INTERVALO_ENVIO_MS` | 10000 | Cada cuánto se manda a la nube |
+| `INTERVALO_MENSAJE_MS` | 15000 | Mensaje en el Monitor Serie |
+| `SUAVIZADO` | 0.3 | Peso de la lectura nueva |
+| `LECTURAS_PARA_CAMBIO` | 4 | Lecturas seguidas para cambiar de color |
+| `TABLA_MV[]` | 12 valores | Voltaje típico para índice UV 0 a 11 |
 
----
+### Monitor Serie (115200 baud)
 
-## Arquitectura del software
-
-```mermaid
-flowchart TD
-    S[setup: configura pines,<br/>prueba de luces,<br/>inicia WiFi] --> L
-    S --> T
-
-    subgraph N1[Núcleo 1 - loop cada 0,5 s]
-      L[Leer sensor<br/>64 muestras] --> C[mV → índice UV<br/>interpolación]
-      C --> F[Suavizado 30/70]
-      F --> D[Nivel OMS<br/>confirmado 4 veces]
-      D --> SEM[Encender semáforo]
-      D --> MS[Mensaje en Monitor<br/>Serie cada 15 s]
-    end
-
-    subgraph N0[Núcleo 0 - tarea Internet cada 0,5 s]
-      T[¿WiFi conectado?] -- no --> R[Reintentar cada 20 s]
-      T -- sí --> A[¿Cambió el nivel?<br/>→ aviso Telegram]
-      A --> P[Cada 10 s: getUpdates<br/>→ responder /estado]
-    end
+```
+[WiFi] Conectado a ... IP: 172.20.10.3
+[Nube] POST {"dispositivo":"uv-colegio-1","indice_uv":0.52,"milivoltios":142,"nivel":"BAJO"} -> 201 (843 ms) | OK: 12, fallidos: 0
+--------------------------------------------------
+LUZ VERDE - Radiacion UV baja. Se puede salir a la calle con tranquilidad.
+Indice UV: 0.5 (BAJO) | Sensor: 142 mV
 ```
 
-### Módulos principales
+---
 
-1. **Inicialización (`setup`)** – configura pines y ADC (12 bits, atenuación 11 dB, rango ~0–3,1 V), hace la prueba de luces, inicia el WiFi y crea la tarea de Internet.
-2. **Lectura de sensor (`leerMilivoltios`)** – promedia 64 lecturas calibradas en mV (`analogReadMilliVolts`).
-3. **Procesamiento (`milivoltiosAIndiceUV`, `indiceANivel`, `actualizarNivel`)** – convierte a índice UV, suaviza y decide el nivel OMS con confirmación de 4 lecturas.
-4. **Actuación (`mostrarNivel`, `mostrarMensaje`)** – enciende el LED correspondiente (con parpadeo en niveles 8+) e imprime el mensaje de recomendación.
-5. **Comunicación (`tareaInternet`, `enviarTelegram`, `revisarTelegram`)** – avisos por Telegram y respuesta al comando `/estado`.
+## Servidor y panel web
+
+El servidor vive también en un repositorio aparte (`sensor-uv-web`) porque Railway despliega desde la raíz de un repositorio. Esta carpeta es la copia de respaldo.
+
+1. **Aiven** (https://console.aiven.io): *Create service → PostgreSQL →* plan **Free** (revisar que diga *Monthly price: Free*). Copiar la **Service URI** y el **CA certificate**.
+2. **GitHub:** repositorio con el contenido de `servidor/` en la raíz (sin `.env` ni `node_modules`).
+3. **Railway** (https://railway.com): *Continue with GitHub → GitHub Repository →* elegir el repositorio.
+4. Pestaña **Variables**: `DATABASE_URL` (Service URI), `DB_CA_CERT` (certificado completo), `API_KEY` (clave larga inventada). Presionar **Deploy**.
+5. **Settings → Networking → Generate Domain**, puerto **8080**. Activar *Auto deploy*.
+6. Comprobar `https://SU-APP.up.railway.app/api/salud` → `{"ok":true,"db":"conectada"}`.
+
+Errores comunes: 401 = `API_KEY` distinta; 400 = JSON mal armado o fuera de rango; 500 = el servidor no llega a la base (revisar logs); -1 = URL mal escrita.
 
 ---
 
-## API / Endpoints
+## Solución de problemas
 
-El ESP32 no expone endpoints propios. Usa la API de Telegram como cliente:
-
-| Endpoint de Telegram | Método | Uso |
-|----------------------|--------|-----|
-| `/bot<TOKEN>/sendMessage` | GET (HTTPS) | Enviar el aviso o la respuesta al celular |
-| `/bot<TOKEN>/getUpdates` | GET (HTTPS) | Leer cada 10 s si alguien escribió al bot |
-
-### Comandos del bot
-
-| Comando | Respuesta |
-|---------|-----------|
-| `/estado` | Índice UV actual, color del semáforo y recomendación |
-| `/start` u otro texto | Mensaje de ayuda (o el chat ID si el chat no está configurado) |
+| Problema | Causa probable | Solución |
+|---|---|---|
+| Se queda en "Conectando a WiFi" | Red de 5 GHz o con usuario (eduroam) | Hotspot del celular en 2,4 GHz ("Maximizar compatibilidad" en iPhone) |
+| `[Nube] ... -> 401` | API_KEY distinta en el ESP32 y en Railway | Copiar la misma clave, sin espacios |
+| `[Nube] ... -> -1` | URL mal escrita o sin `https://` | Copiar la URL de Railway y agregar `/api/lecturas` |
+| Telegram error 429 / -11 / 502 | Consultas muy seguidas o red lenta | Ya resuelto: consulta cada 10 s, espera 15 s |
+| Índice UV ≈ 4 a oscuras | GND del sensor suelto | Revisar GND |
+| UV ≈ 0 bajo techo | Normal: el vidrio bloquea el UV | Probar al aire libre |

@@ -1,93 +1,45 @@
 # Testing y Validación
 
 ## Objetivo
-Validar el funcionamiento del prototipo con usuarios reales y medir el impacto cuantitativo en la problemática ODS seleccionada.
+Verificar que el prototipo mide, muestra y avisa correctamente el nivel de radiación UV, y validar con usuarios reales que la información es clara y útil para proteger a los niños durante la jornada escolar.
 
 ---
 
-## 📁 Carpetas
+## Carpetas
 
-#### `reportes/`
-Documentos con resultados del testing
-
-#### `evidencias/`
-Fotos y videos de sesiones con usuarios
-
-#### `datos/`
-Datos cuantitativos recolectados
+| Carpeta | Contenido |
+|---------|-----------|
+| `reportes/` | [`protocolo_pruebas.md`](reportes/protocolo_pruebas.md) (Avance 3), [`reporte_testing.md`](reportes/reporte_testing.md) (resultados, fallas y validación) y [`pruebas_tecnicas.md`](reportes/pruebas_tecnicas.md) (Avance 2) |
+| `evidencias/` | Capturas y fotos de las pruebas |
+| `datos/` | CSV de la base, log del Monitor Serie y script `analizar_datos.py` |
 
 ---
 
-## Metodología de Testing
+## 1. Pruebas del Avance 3
 
-### Grupo Objetivo
-- **Perfil de usuarios:** [Descripción]
-- **Cantidad mínima:** 5 usuarios
-- **Ubicación:** [Contexto real de uso]
+Siete pruebas (P1–P7): captura continua y persistencia, latencia y tasa de error del envío, cero en oscuridad, comparación con MeteoChile, respuesta de extremo a extremo, autonomía con batería y seguridad de la API. Protocolo en [`reportes/protocolo_pruebas.md`](reportes/protocolo_pruebas.md) y resultados en [`reportes/reporte_testing.md`](reportes/reporte_testing.md).
 
-### Protocolo de Testing
-1. **Briefing** (5 min)
-   - Explicar propósito del prototipo
-   - Contexto de uso
+## 2. Pruebas técnicas (realizadas – Avance 2)
 
-2. **Sesión de Uso** (15-20 min)
-   - Usuario interactúa con prototipo
-   - Observación sin intervención
-   - Toma de notas
+Se hicieron **11 pruebas técnicas** de instalación, hardware, software y conectividad durante el desarrollo (14/10 – 19/10/2026). El detalle de cada prueba, el resultado y la acción tomada está en [`reportes/pruebas_tecnicas.md`](reportes/pruebas_tecnicas.md).
 
-3. **Entrevista Post-Testing** (10 min)
-   - Preguntas sobre experiencia
-   - Feedback cualitativo
-   - Sugerencias de mejora
+| Resultado | Cantidad |
+|-----------|----------|
+| Correctas al primer intento | 5 |
+| Con falla, corregidas | 5 |
+| Con falla, resuelta con un cambio de diseño (protoboard → conexión directa) | 1 |
 
-4. **Encuesta Cuantitativa** (5 min)
-   - Escala Likert (1-5)
-   - Métricas específicas
+**Principales hallazgos:**
+- Sin GND común el sensor da lecturas falsas (UV 4 en oscuridad).
+- El montaje en protoboard no es adecuado para este ESP32 y estos módulos.
+- La comunicación con Telegram por hotspot necesita consultas espaciadas (10 s) y mayor tiempo de espera (15 s).
 
----
-
-## Métricas de Evaluación
-
-### Usabilidad
-- Facilidad de uso (1-5)
-- Claridad de funcionamiento (1-5)
-- Satisfacción general (1-5)
-
-### Impacto ODS
-- [Métrica específica 1 relacionada con ODS]
-- [Métrica específica 2 relacionada con ODS]
-- [Métrica específica 3 relacionada con ODS]
-
-### Desempeño Técnico
-- Tiempo de respuesta del sistema
-- Tasa de errores
-- Confiabilidad
+### Aprendizajes del proceso de testing
+1. **Probar en condiciones conocidas primero.** Medir en oscuridad (donde el UV debe ser 0) permitió detectar la lectura falsa de UV 4 causada por el GND desconectado.
+2. **Cambiar una sola cosa a la vez.** Al pasar a protoboard se cambiaron varias conexiones al mismo tiempo y fue difícil encontrar la falla del semáforo; volver a la versión que funcionaba resolvió el problema.
+3. **Los mensajes del Monitor Serie son clave para diagnosticar.** Los códigos de error de Telegram (-11, 429, 502) indicaron exactamente qué ajustar.
+4. **El ambiente de prueba importa.** Bajo techo el sensor marca cerca de 0 porque el vidrio bloquea el UV; para probar todos los niveles se necesita sol directo o una linterna UV de 365 nm.
+5. **Guardar la versión que funciona** antes de agregar funciones nuevas permitió presentar aunque la versión con WiFi fallara.
 
 ---
 
-## Análisis de Resultados
-
-### Cuantitativo
-- Promedios y desviaciones estándar
-- Gráficos de resultados
-- Comparación con baseline
-
-### Cualitativo
-- Temas recurrentes en feedback
-- Problemas identificados
-- Sugerencias de mejora
-
----
-
-## Validación de Impacto ODS
-
-**ODS Seleccionado:** [Número y nombre]
-
-**Meta específica del proyecto:** [Describir]
-
-**Indicadores de impacto:**
-1. [Indicador 1] - Baseline: [X], Meta: [Y], Alcanzado: [Z]
-2. [Indicador 2] - Baseline: [X], Meta: [Y], Alcanzado: [Z]
-
-**Proyección de impacto a escala:**
-[Si el prototipo se despliega en toda la ciudad/comunidad, cuál sería el impacto estimado]

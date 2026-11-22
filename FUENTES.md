@@ -1,64 +1,111 @@
 # Fuentes del Proyecto
 
-## Librerías utilizadas
+Declaración de librerías, servicios, código externo, modelos 3D de terceros y uso de inteligencia artificial, según la sección 6 de la guía del Avance 3.
 
-No se usan librerías externas. Todas las librerías vienen incluidas en el paquete oficial del ESP32 para Arduino.
+---
 
-| Librería | Versión | Fuente |
-|----------|---------|--------|
-| WiFi.h | incluida en esp32 3.3.x | github.com/espressif/arduino-esp32 |
-| WiFiClientSecure.h | incluida en esp32 3.3.x | github.com/espressif/arduino-esp32 |
-| HTTPClient.h | incluida en esp32 3.3.x | github.com/espressif/arduino-esp32 |
+## 1. Librerías y dependencias
 
-**Herramientas:** Arduino IDE 2.3.10 · paquete de placas "esp32 by Espressif Systems" 3.3.12 · driver CP210x de Silicon Labs.
+### Firmware (ESP32, `software/src/main.ino`)
 
-## Servicios externos
+| Librería | Versión | Uso en el proyecto | Fuente |
+|----------|---------|--------------------|--------|
+| Arduino core para ESP32 (`WiFi.h`, `WiFiClientSecure.h`, `HTTPClient.h`) | 3.3.x (Espressif) | Conexión WiFi, HTTPS a Telegram y al servidor | https://github.com/espressif/arduino-esp32 |
+| ArduinoJson | 7.x | Armar el JSON de cada lectura que se envía al servidor (`enviarLecturaNube`) | https://arduinojson.org · https://github.com/bblanchon/ArduinoJson |
+| FreeRTOS (incluido en el core ESP32) | — | Tarea de Internet en el núcleo 0 (`xTaskCreatePinnedToCore`) | https://www.freertos.org |
+
+**Herramientas:** Arduino IDE 2.3.10 · driver CP210x de Silicon Labs (v6.7.6).
+
+### Servidor y panel web (`software/servidor/`)
+
+| Librería | Versión | Uso en el proyecto | Fuente |
+|----------|---------|--------------------|--------|
+| Node.js | ≥ 18 | Entorno del servidor | https://nodejs.org |
+| Express | ^4.21.0 | API HTTP y entrega de la página web | https://expressjs.com |
+| pg (node-postgres) | ^8.13.0 | Conexión a PostgreSQL con SSL | https://node-postgres.com |
+| dotenv | ^16.4.5 | Leer variables de entorno en local | https://github.com/motdotla/dotenv |
+| Chart.js | 4.4.1 (CDN jsDelivr) | Gráfico histórico y gráfico de máximos diarios del panel | https://www.chartjs.org |
+
+---
+
+## 2. Servicios externos
 
 | Servicio | Uso | Documentación |
 |----------|-----|---------------|
-| Telegram Bot API | Envío de avisos al celular (`sendMessage`) y lectura de comandos (`getUpdates`) | https://core.telegram.org/bots/api |
-| @BotFather (Telegram) | Creación del bot y obtención del token | https://core.telegram.org/bots#how-do-i-create-a-bot |
+| Railway (plan Trial) | Ejecuta el servidor Express y publica el panel con una URL pública | https://docs.railway.com |
+| Aiven for PostgreSQL (plan Free) | Base de datos donde se guardan las lecturas | https://aiven.io/docs/products/postgresql |
+| GitHub | Código del servidor (despliegue automático en Railway) y respaldo del proyecto | https://github.com |
+| Telegram Bot API | Avisos al celular (`sendMessage`) y comando `/estado` (`getUpdates`) | https://core.telegram.org/bots/api |
 
-## Referencias técnicas
+---
 
-### Escala de colores del Índice UV (main.ino, líneas 17-22 y 135-142)
-- Fuente: Organización Mundial de la Salud (OMS), *Global Solar UV Index: A Practical Guide* (2002).
-- Uso: rangos 0-2 bajo, 3-5 moderado, 6-7 alto, 8-10 muy alto, 11+ extremo, y las recomendaciones de protección de cada nivel.
+## 3. Código externo adaptado
 
-### Tabla de calibración del sensor (main.ino, líneas 61-64 y 121-133)
-- Fuente: tabla de valores típicos de voltaje de salida por índice UV para el módulo GUVA-S12SD, entregada por la IA (ver Uso de Inteligencia Artificial). No fue medida por el equipo.
-- Adaptación: interpolación lineal entre valores de la tabla.
-- Pendiente: verificar la tabla comparando con el índice UV publicado por MeteoChile.
+### Servidor, página y envío desde el ESP32 (`server.js`, `public/index.html`, `enviarLecturaNube` en `main.ino`)
+- **Fuente:** *Guía TEI: ESP32 + Aiven + Railway* (TEI201, 2026), entregada por el ayudante del curso, y su repositorio de ejemplo https://github.com/ferjomendez/esp32-railway-demo.
+- **Qué se tomó:** estructura del servidor (pool de conexiones con SSL, `crearTabla`, `revisarClave` con `x-api-key`, rutas `/api/salud` y `/api/lecturas`), la página con Chart.js que se refresca cada 5 s y la función de envío con `HTTPClient` + ArduinoJson.
+- **Adaptación:**
+  - La tabla genérica `lecturas (sensor, valor)` se cambió por `lecturas_uv (indice_uv, milivoltios, nivel)`.
+  - Se validan rangos físicos del sensor (índice 0–20, 0–3300 mV) antes de guardar.
+  - El servidor recibe el nivel ya confirmado por el semáforo (4 lecturas seguidas) o lo calcula con la escala OMS.
+  - Rutas nuevas: `/api/ultima`, `/api/historial` (agrupa por tramos para no pasar de ~300 puntos), `/api/resumen` (máximo del día y su hora, minutos en cada nivel, alertas) y `/api/exportar.csv`.
+  - La página se rehízo: estado actual con color OMS, recomendación para el colegio, alerta, estadísticas, franjas de color en el gráfico, filtros de tiempo, máximo diario y tabla.
+  - El envío a la nube se integró en la tarea de Internet existente (núcleo 0), junto a Telegram, con contadores de envíos OK/fallidos y latencia para el testing.
 
-## Código externo adaptado
+### Escala del Índice UV y recomendaciones
+- **Fuente:** Organización Mundial de la Salud (OMS), *Global Solar UV Index: A Practical Guide* (2002). https://www.who.int/publications/i/item/9241590076
+- **Uso:** rangos 0–2, 3–5, 6–7, 8–10, 11+, colores oficiales de la escala (verde, amarillo, naranja, rojo, violeta) y las medidas de protección de cada nivel.
+- **Adaptación:** las recomendaciones se tradujeron a decisiones concretas para un colegio (recreo, Educación Física).
 
-No se copió código de tutoriales externos. El código fue generado con asistencia de IA (ver sección siguiente) usando las librerías oficiales del ESP32.
+### Tabla de calibración del sensor (`TABLA_MV` en `main.ino`)
+- **Fuente:** valores típicos de voltaje por índice UV para módulos GUVA-S12SD, entregados por la IA (ver sección 5). No fueron medidos por el equipo.
+- **Adaptación:** interpolación lineal entre valores de la tabla.
+- **Pendiente:** verificar comparando con el índice UV publicado por MeteoChile (ver `testing/`).
 
-## Uso de Inteligencia Artificial
+---
 
-**Herramienta:** Claude (Anthropic), octubre 2026.
+## 4. Modelos 3D de terceros
 
-### Firmware completo (software/src/main.ino)
+| Modelo | Uso | Fuente |
+|--------|-----|--------|
+| ESP32 WROOM CP2102 30 pines (`esp32_Wroom_CP2102_USMmicro.step`) | Volumen del ESP32 dentro del gemelo 3D | Descargado de la comunidad GrabCAD ("esp32-wroom-cp2102-30pins") – [completar autor y link] |
+| Módulo LED semáforo (`ModLed.STEP`) | Volumen del semáforo dentro del gemelo 3D | Descargado de la comunidad GrabCAD ("moduloledsemaforo") – [completar autor y link] |
+
+Los demás componentes (LiPo Rider Pro, batería 603450, panel solar 100 × 80, sensor UV) se modelaron como volúmenes con las medidas de las placas reales (ver `diseno_3d/README.md`). La carcasa es diseño propio del equipo.
+
+---
+
+## 5. Uso de Inteligencia Artificial
+
+**Herramientas:** Claude (Anthropic), en el chat de claude.ai y en Claude Code conectado a Fusion 360. Octubre – noviembre de 2026.
+
+### 5.1 Firmware (`software/src/main.ino`)
 - **Prompts principales:**
   - "Tengo que hacer el dispositivo que detecte cuánto UV hay y que me ayudes con el código. Tengo un ESP32, un GUVA-S12SD marca Keyes y un mini semáforo V1224."
-  - "Me gustaría un mensaje cada 15 segundos, por ejemplo LUZ VERDE: se puede salir a la calle con tranquilidad; con amarillo que se pueda salir pero usando bloqueador, y así con los demás colores."
-  - "Quiero conectarme con el celular para que me avise vía WiFi." (iPhone)
-- **Qué generó la IA:** lectura y promedio del sensor, conversión de voltaje a índice UV, suavizado y confirmación del cambio de nivel, control del semáforo, mensajes por nivel, conexión WiFi y envío/recepción de mensajes de Telegram.
-- **Adaptaciones del equipo:**
-  - Se definieron los mensajes de recomendación de cada nivel.
-  - Se cambió de protoboard a conexión directa con cables hembra-hembra porque los módulos quedaban frágiles y hubo fallas de conexión a GND.
-  - Se alimentó el sensor también desde el pin D32 para poder armarlo en protoboard.
-  - Se subió el intervalo de consulta a Telegram de 3 s a 10 s y el tiempo de espera de 8 s a 15 s, por errores 429, -11 y 502 con el hotspot del celular.
-  - Se reemplazaron las credenciales (WiFi, token y chat ID) por textos de ejemplo antes de subir el código.
+  - "Me gustaría un mensaje cada 15 segundos (…) con amarillo que se pueda salir pero usando bloqueador, y así con los demás colores."
+  - "Quiero conectarme con el celular para que me avise vía WiFi."
+  - (Avance 3) Adaptar el código para mandar las lecturas a Railway siguiendo la guía del ayudante, sin perder el semáforo ni Telegram.
+- **Qué generó la IA:** lectura y promedio del sensor, conversión a índice UV, suavizado y confirmación de nivel, control del semáforo, conexión WiFi, Telegram y la función `enviarLecturaNube`.
+- **Adaptaciones del equipo:** mensajes de cada nivel; conexión directa hembra-hembra tras las fallas en protoboard; alimentación opcional por D32; intervalo de Telegram de 3 s → 10 s y tiempo de espera de 8 s → 15 s por los errores 429, -11 y 502; credenciales reemplazadas por textos de ejemplo.
 - **Comprensión:**
-  - El sensor entrega un voltaje (mV) proporcional a la radiación UV. Se promedian 64 lecturas para reducir el ruido.
-  - El voltaje se convierte a índice UV interpolando entre valores de una tabla de calibración.
-  - El valor se suaviza (30 % lectura nueva, 70 % historial) y el color solo cambia tras 4 lecturas seguidas del nuevo nivel.
-  - Se usa el pin D34 porque pertenece al ADC1, que sigue funcionando con el WiFi encendido.
-  - Internet corre en una tarea separada en el otro núcleo del ESP32, para que el semáforo no se trabe. Telegram se consulta cada 10 s (*polling*) porque el ESP32 no puede recibir conexiones desde Internet.
+  - El sensor entrega un voltaje proporcional al UV; se promedian 64 lecturas y se interpola en la tabla para obtener el índice.
+  - El valor se suaviza (30 % nuevo / 70 % historial) y el color cambia solo tras 4 lecturas seguidas del nuevo nivel.
+  - D34 pertenece al ADC1, que funciona con WiFi encendido.
+  - Internet corre en una tarea del núcleo 0 para que el semáforo nunca se trabe. Cada 10 s se arma un JSON con ArduinoJson y se manda por POST HTTPS con la `x-api-key`; el servidor responde 201 si lo guardó.
 
-### Diagnóstico y armado
-- **Uso:** guía para instalar Arduino IDE, el paquete esp32 y el driver CP210x, armar las conexiones y diagnosticar fallas (lectura de UV 4 a oscuras por falta de GND, semáforo apagado, errores de Telegram).
+### 5.2 Servidor y panel web (`software/servidor/`)
+- **Prompt:** "Haz todo lo de la entrega final siguiendo la guía de Railway y Aiven (…) para la nota alta piden información útil, por ejemplo una alerta o color cuando el índice UV pasa un umbral."
+- **Qué generó la IA:** adaptación de `server.js` y `index.html` descrita en la sección 3.
+- **Comprensión:** el ESP32 no se conecta directo a la base de datos: el servidor hace de intermediario, revisa la clave y usa consultas parametrizadas (`$1, $2`) para evitar inyección SQL. `/api/resumen` calcula los minutos en cada nivel sumando el tiempo entre lecturas consecutivas (máximo 60 s por tramo, para no contar cortes de conexión) y cuenta una alerta cada vez que el nivel sube a ALTO o más.
 
-### Documentación del repositorio
-- **Uso:** redacción inicial de los README de `software/`, `hardware/`, `testing/` e `iteraciones/` y del esquema de conexiones, a partir del trabajo realizado por el equipo. Revisado y completado por el equipo.
+### 5.3 Modelo 3D (Fusion 360)
+- **Herramienta:** Claude Code conectado a Fusion 360 por el servidor MCP oficial de Fusion.
+- **Uso:** generación de los scripts de Python (`diseno_3d/scripts_fusion/parte1…parte14`) que construyen la carcasa v4: persianas a 45°, techo solar a 20°, postes con insertos térmicos, bolsillo de batería, rieles del panel, ajustes de insertos M2.5.
+- **Adaptación del equipo:** se definieron las medidas reales de agujeros de cada placa con regla (`referencias/medidas-agujeros-v3.md`), los materiales y las correcciones de cada iteración (quitar la peineta, mover la traba, quitar el tubo de cables, pasos del techo a 4 mm).
+
+### 5.4 Renders, planos, esquemático y documentación
+- **Uso:** renders del gemelo 3D y planos técnicos generados desde los STL de la v4 (con los volúmenes de componentes del modelo); dibujo del esquemático con el sistema solar; redacción de los README, protocolo de pruebas y estructura de esta declaración.
+- **Revisión del equipo:** medidas, materiales y conexiones revisadas contra el prototipo real.
+
+### 5.5 Precios de la BOM
+- **Uso:** búsqueda de precios referenciales en tiendas chilenas (MCI Electronics). Los precios que no se encontraron están marcados para completar con la boleta real.

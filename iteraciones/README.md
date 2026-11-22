@@ -2,29 +2,29 @@
 
 ## Propósito
 
-Esta carpeta documenta cómo evolucionó el sistema desde el concepto inicial (Avance 1) hasta el prototipo funcional actual (Avance 2), y qué falta para la versión final.
+Esta carpeta documenta cómo evolucionó el sistema desde el concepto inicial (Avance 1) hasta el prototipo IoT completo del Avance 3.
 
 ```
 iteraciones/
 ├── iteracion_1/    # Concepto inicial – Avance 1
 ├── iteracion_2/    # Prototipo funcional – Avance 2 (versiones v2.0 a v2.3)
-└── iteracion_3/    # Versión final – Avance 3 (planificada)
+└── iteracion_3/    # Versión final – Avance 3 (nube, panel web, energía solar, carcasa v4)
 ```
 
 ---
 
 ## Tabla comparativa de iteraciones
 
-| Aspecto | v1 – Concepto | v2 – Prototipo funcional | v3 – Final (planificada) |
+| Aspecto | v1 – Concepto | v2 – Prototipo funcional | v3 – Final |
 |---------|---------------|--------------------------|--------------------------|
-| **Fecha** | Septiembre 2026 | 14/10 – 27/10/2026 | [fecha Avance 3] |
-| **Sensores** | Sensor UV (concepto) | GUVA-S12SD conectado al ESP32 | GUVA-S12SD calibrado con MeteoChile |
-| **Actuadores** | — | Semáforo LED V1224 (5 niveles con parpadeo) | Semáforo integrado en la cápsula |
-| **Conectividad** | — | WiFi + avisos por Telegram | WiFi + Telegram (posible grupo del colegio) |
-| **Ubicación** | Fijo en un poste | Portátil (propuesta: instalar y retirar del poste) | Portátil con soporte para poste |
-| **Encapsulado** | Cápsula básica (solo contener el sensor) | Modelo 3D v1 en Fusion 360 (113 × 116 × 76 mm) | Cápsula con encajes y tamaño ajustado |
-| **Información entregada** | Color de riesgo general | Índice UV numérico + color + recomendación | Igual a v2, validada con usuarios |
-| **Testing** | — | Pruebas técnicas del equipo | Pruebas con 5+ usuarios |
+| **Fecha** | Septiembre 2026 | 14/10 – 27/10/2026 | 22/11/2026 |
+| **Sensores** | Sensor UV (concepto) | GUVA-S12SD conectado al ESP32 | GUVA-S12SD (calibración con MeteoChile en curso) |
+| **Actuadores** | — | Semáforo LED V1224 (5 niveles con parpadeo) | Semáforo en la tapa frontal de la carcasa |
+| **Conectividad** | — | WiFi + avisos por Telegram | WiFi + Telegram + servidor Railway + base PostgreSQL (Aiven) + panel web |
+| **Ubicación** | Fijo en un poste | Portátil (propuesta: instalar y retirar del poste) | Carcasa con soporte de pared (cola de milano) y energía solar |
+| **Encapsulado** | Cápsula básica (solo contener el sensor) | Modelo 3D v1 en Fusion 360 (113 × 116 × 76 mm) | Carcasa v4 en ASA con insertos, junta TPU y techo solar (120 × 111,4 × 154,5 mm) |
+| **Información entregada** | Color de riesgo general | Índice UV numérico + color + recomendación | + alertas, estadísticas del día e historial |
+| **Testing** | — | Pruebas técnicas del equipo | Protocolo de pruebas con datos cuantitativos de la nube |
 
 ---
 
@@ -60,8 +60,8 @@ iteraciones/
 Detalle de cada versión intermedia en [`iteracion_2/README.md`](iteracion_2/README.md).
 
 ### Versión 3 (Iteración 3) – Versión final
-**Fecha:** [Avance 3]
-**Estado:** planificada. Ver [`iteracion_3/README.md`](iteracion_3/README.md).
+**Fecha:** 22/11/2026
+**Estado:** prototipo IoT completo. Ver [`iteracion_3/README.md`](iteracion_3/README.md).
 
 ---
 

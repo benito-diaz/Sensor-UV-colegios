@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Índice UV en el colegio</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <style>
+    :root {
+      --fondo: #f4f5f7; --tarjeta: #ffffff; --tinta: #1b1f24; --tinta-2: #4a525c; --tinta-3: #77808b;
+      --borde: #e2e5ea; --grilla: #eceef1;
+      /* Colores oficiales de la escala UV de la OMS */
+      --uv-bajo: #3ea72d; --uv-moderado: #fff300; --uv-alto: #f18b00; --uv-muyalto: #e53210; --uv-extremo: #b567a4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --fondo: #14171b; --tarjeta: #1d2126; --tinta: #eef0f3; --tinta-2: #b9c0c8; --tinta-3: #8a929c;
+              --borde: #2e333a; --grilla: #2a2f35; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--fondo); color: var(--tinta);
+           font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.4; }
+    main { max-width: 1040px; margin: 0 auto; padding: 20px 16px 40px; }
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px; margin-bottom: 16px; }
+    h1 { font-size: 1.5rem; margin: 0; }
+    .sub { color: var(--tinta-3); font-size: .9rem; }
+    .enlinea { font-size: .9rem; color: var(--tinta-2); display: flex; align-items: center; gap: 6px; }
+    .punto { width: 10px; height: 10px; border-radius: 50%; background: var(--tinta-3); display: inline-block; }
+    .punto.on { background: var(--uv-bajo); } .punto.off { background: var(--uv-muyalto); }
+    .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 16px; }
+    .grid { display: grid; gap: 12px; }
+    .hero { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; }
+    .numero { font-size: 4.5rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+    .numero small { display: block; font-size: .85rem; font-weight: 500; color: var(--tinta-3); margin-top: 4px; }
+    .insignia { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.15rem; }
+    .muestra { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(0,0,0,.15); flex: none; }
+    .reco { margin: 8px 0 0; font-size: 1.05rem; }
+    .reco-col { margin: 6px 0 0; color: var(--tinta-2); }
+    .alerta { display: none; margin: 12px 0; padding: 12px 16px; border-radius: 12px; font-weight: 600;
+              border: 2px solid var(--uv-muyalto); background: color-mix(in srgb, var(--uv-muyalto) 10%, var(--tarjeta)); }
+    .alerta.ver { display: flex; gap: 10px; align-items: flex-start; }
+    .stats { grid-template-columns: repeat(4, 1fr); margin-top: 12px; }
+    .stat .etiqueta { color: var(--tinta-3); font-size: .85rem; }
+    .stat .valor { font-size: 1.8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .stat .det { color: var(--tinta-2); font-size: .85rem; }
+    h2 { font-size: 1.05rem; margin: 0 0 4px; }
+    .seccion { margin-top: 12px; }
+    .barra-niveles { display: flex; gap: 2px; height: 22px; border-radius: 6px; overflow: hidden; margin: 10px 0 8px; background: var(--grilla); }
+    .barra-niveles div { height: 100%; }
+    .leyenda { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .85rem; color: var(--tinta-2); }
+    .leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+    .leyenda i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,.15); }
+    .filtros { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+    .filtros button { border: 1px solid var(--borde); background: var(--tarjeta); color: var(--tinta-2);
+                      border-radius: 8px; padding: 6px 12px; font: inherit; font-size: .9rem; cursor: pointer; }
+    .filtros button.activo { background: var(--tinta); color: var(--tarjeta); border-color: var(--tinta); }
+    .lienzo { position: relative; height: 300px; }
+    .dos { grid-template-columns: 2fr 1fr; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+    th, td { border-bottom: 1px solid var(--borde); padding: 6px 4px; text-align: left; }
+    th { color: var(--tinta-3); font-weight: 600; }
+    a { color: inherit; }
+    .vacio { color: var(--tinta-3); padding: 24px 0; text-align: center; }
+    footer { margin-top: 16px; color: var(--tinta-3); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .dos { grid-template-columns: 1fr; }
+      .hero { grid-template-columns: 1fr; gap: 8px; }
+      .numero { font-size: 3.5rem; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Índice UV en el colegio</h1>
+      <div class="sub">Medidor IoT · Peñalolén · escala de la OMS</div>
+    </div>
+    <div class="enlinea"><span class="punto" id="punto"></span><span id="txtEnLinea">Conectando…</span></div>
+  </header>
+
+  <!-- Estado actual -->
+  <section class="tarjeta hero">
+    <div class="numero" id="uvActual">–<small>índice UV ahora</small></div>
+    <div>
+      <div class="insignia"><span class="muestra" id="muestraNivel"></span><span id="nivelActual">Esperando datos</span></div>
+      <p class="reco" id="reco">Cuando el ESP32 mande su primera lectura aparecerá aquí.</p>
+      <p class="reco-col" id="recoColegio"></p>
+    </div>
+  </section>
+
+  <!-- Alerta: solo aparece con UV ALTO o más -->
+  <div class="alerta" id="alerta" role="alert"><span aria-hidden="true">⚠️</span><span id="txtAlerta"></span></div>
+
+  <!-- Estadísticas del día -->
+  <section class="grid stats">
+    <div class="tarjeta stat"><div class="etiqueta">Máximo de hoy</div><div class="valor" id="maxHoy">–</div><div class="det" id="maxHora"></div></div>
+    <div class="tarjeta stat"><div class="etiqueta">Promedio de hoy</div><div class="valor" id="promHoy">–</div><div class="det" id="lecturasHoy"></div></div>
+    <div class="tarjeta stat"><div class="etiqueta">Tiempo con protección necesaria (UV ≥ 3)</div><div class="valor" id="minProt">–</div><div class="det">bloqueador, gorro y sombra</div></div>
+    <div class="tarjeta stat"><div class="etiqueta">Alertas de hoy (UV alto o más)</div><div class="valor" id="alertasHoy">–</div><div class="det" id="primeraAlerta"></div></div>
+  </section>
+
+  <!-- Tiempo en cada nivel -->
+  <section class="tarjeta seccion">
+    <h2>¿Cuánto tiempo estuvo hoy en cada nivel?</h2>
+    <div class="barra-niveles" id="barraNiveles"></div>
+    <div class="leyenda" id="leyendaNiveles"></div>
+  </section>
+
+  <!-- Gráfico histórico -->
+  <section class="tarjeta seccion">
+    <h2>Índice UV en el tiempo</h2>
+    <div class="sub">Las franjas de color son los niveles de la OMS. Pasa el cursor sobre la línea para ver cada valor.</div>
+    <div class="filtros" id="filtros">
+      <button data-horas="1" class="activo">Última hora</button>
+      <button data-horas="6">6 horas</button>
+      <button data-horas="24">24 horas</button>
+      <button data-horas="168">7 días</button>
+    </div>
+    <div class="lienzo"><canvas id="grafico" aria-label="Gráfico del índice UV en el tiempo"></canvas></div>
+  </section>
+
+  <section class="grid dos seccion">
+    <div class="tarjeta">
+      <h2>Últimas lecturas</h2>
+      <table>
+        <thead><tr><th>Hora</th><th>Índice UV</th><th>Nivel</th><th>Sensor (mV)</th></tr></thead>
+        <tbody id="tabla"></tbody>
+      </table>
+      <p class="sub"><a href="/api/exportar.csv?horas=24">Descargar datos de las últimas 24 h (CSV)</a></p>
+    </div>
+    <div class="tarjeta">
+      <h2>Máximo diario (7 días)</h2>
+      <div class="lienzo" style="height:220px"><canvas id="graficoDias" aria-label="Máximo índice UV de cada día"></canvas></div>
+    </div>
+  </section>
+
+  <footer>
+    Datos: ESP32 + sensor GUVA-S12SD, una lectura cada 10 s, guardadas en PostgreSQL (Aiven) y servidas desde Railway.
+    Escala y recomendaciones según el Índice UV Solar Mundial de la OMS. Este medidor es un prototipo educativo:
+    complementa, no reemplaza, el pronóstico UV oficial.
+  </footer>
+</main>
+
+<script>
+// ---------- Escala de la OMS ----------
+const NIVELES = {
+  "BAJO":     { color: "var(--uv-bajo)",     hex: "#3ea72d", desde: 0,    hasta: 2.5,
+    reco: "Radiación baja. No se necesita protección especial.",
+    colegio: "Recreo y Educación Física al aire libre sin restricciones." },
+  "MODERADO": { color: "var(--uv-moderado)", hex: "#fff300", desde: 2.5,  hasta: 5.5,
+    reco: "Protección necesaria: bloqueador, gorro y lentes de sol.",
+    colegio: "Recreo normal con bloqueador y gorro; preferir la sombra cerca del mediodía." },
+  "ALTO":     { color: "var(--uv-alto)",     hex: "#f18b00", desde: 5.5,  hasta: 7.5,
+    reco: "Protección necesaria: buscar sombra, bloqueador, gorro, lentes y ropa que cubra.",
+    colegio: "Recreo en zonas con sombra. Educación Física bajo techo o en otro horario." },
+  "MUY ALTO": { color: "var(--uv-muyalto)",  hex: "#e53210", desde: 7.5,  hasta: 10.5,
+    reco: "Protección extra: evitar estar al sol; si es indispensable, poco tiempo y con protección completa.",
+    colegio: "Evitar actividades al sol. Recreo bajo techo o en sombra total." },
+  "EXTREMO":  { color: "var(--uv-extremo)",  hex: "#b567a4", desde: 10.5, hasta: 20,
+    reco: "Riesgo extremo para la salud. Permanecer bajo techo.",
+    colegio: "Suspender actividades al aire libre. Recreo bajo techo." },
+};
+const SEMAFORO = { "BAJO": "luz verde", "MODERADO": "luz amarilla", "ALTO": "luz roja",
+                   "MUY ALTO": "luz roja parpadeando", "EXTREMO": "luz roja parpadeo rápido" };
+const ORDEN = ["BAJO", "MODERADO", "ALTO", "MUY ALTO", "EXTREMO"];
+const fmtHora = new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit", timeZone: "America/Santiago", hourCycle: "h23" });
+const fmtHoraSeg = new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "America/Santiago", hourCycle: "h23" });
+const fmtDiaHora = new Intl.DateTimeFormat("es-CL", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: "America/Santiago", hourCycle: "h23" });
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function minutosATexto(m) {
+  if (m == null) return "–";
+  if (m < 60) return `${Math.round(m)} min`;
+  return `${Math.floor(m / 60)} h ${Math.round(m % 60)} min`;
+}
+
+// ---------- Estado actual ----------
+async function actualizarEstado() {
+  const u = await (await fetch("/api/ultima")).json();
+  if (!u) return;
+  const n = NIVELES[u.nivel];
+  $("uvActual").innerHTML = `${u.indice_uv.toFixed(1)}<small>índice UV ahora</small>`;
+  $("muestraNivel").style.background = n.color;
+  $("nivelActual").textContent = `UV ${u.nivel} · semáforo en ${SEMAFORO[u.nivel]}`;
+  $("reco").textContent = n.reco;
+  $("recoColegio").textContent = "En el colegio: " + n.colegio;
+
+  const enLinea = u.hace_s <= 60;  // el ESP32 manda cada 10 s
+  $("punto").className = "punto " + (enLinea ? "on" : "off");
+  $("txtEnLinea").textContent = enLinea
+    ? `En línea · última lectura hace ${u.hace_s} s`
+    : `Sin datos recientes · última lectura ${fmtHora.format(new Date(u.creado_en))}`;
+
+  const alto = ORDEN.indexOf(u.nivel) >= 2;
+  $("alerta").classList.toggle("ver", alto && enLinea);
+  $("txtAlerta").textContent = `Alerta: radiación UV ${u.nivel.toLowerCase()} (índice ${u.indice_uv.toFixed(1)}). ${n.colegio}`;
+}
+
+// ---------- Resumen del día ----------
+let graficoDias;
+async function actualizarResumen() {
+  const r = await (await fetch("/api/resumen")).json();
+  if (!r.lecturas) {
+    $("lecturasHoy").textContent = "sin lecturas hoy";
+  } else {
+    $("maxHoy").textContent = r.maximo.indice_uv.toFixed(1);
+    $("maxHora").textContent = `a las ${fmtHora.format(new Date(r.maximo.creado_en))} · ${r.maximo.nivel}`;
+    $("promHoy").textContent = r.promedio.toFixed(1);
+    $("lecturasHoy").textContent = `${r.lecturas} lecturas desde las ${fmtHora.format(new Date(r.primera))}`;
+  }
+  $("minProt").textContent = minutosATexto(r.minutos_con_proteccion);
+  $("alertasHoy").textContent = r.alertas;
+  $("primeraAlerta").textContent = r.primera_alerta ? `primera a las ${fmtHora.format(new Date(r.primera_alerta))}` : "ninguna todavía";
+
+  // Barra de tiempo por nivel
+  const total = ORDEN.reduce((s, k) => s + r.minutos_por_nivel[k], 0);
+  $("barraNiveles").innerHTML = total === 0 ? "" : ORDEN.filter(k => r.minutos_por_nivel[k] > 0)
+    .map(k => `<div title="${k}: ${minutosATexto(r.minutos_por_nivel[k])}" style="flex:${r.minutos_por_nivel[k]};background:${NIVELES[k].color}"></div>`).join("");
+  $("leyendaNiveles").innerHTML = ORDEN.map(k =>
+    `<span><i style="background:${NIVELES[k].color}"></i>${k}: ${minutosATexto(r.minutos_por_nivel[k])}</span>`).join("");
+
+  // Máximo diario
+  const etiquetas = r.ultimos_dias.map(d => new Date(d.dia + "T12:00:00").toLocaleDateString("es-CL", { weekday: "short", day: "numeric" }));
+  const valores = r.ultimos_dias.map(d => d.maximo);
+  const colores = r.ultimos_dias.map(d => NIVELES[nivelDe(d.maximo)].hex);
+  if (!graficoDias) {
+    graficoDias = new Chart($("graficoDias"), {
+      type: "bar",
+      data: { labels: etiquetas, datasets: [{ label: "Máximo del día", data: valores, backgroundColor: colores,
+              borderColor: "rgba(0,0,0,.25)", borderWidth: 1, borderRadius: 4, maxBarThickness: 28 }] },
+      options: opcionesBase({ tooltip: { callbacks: { label: c => `Máximo: UV ${c.parsed.y} (${nivelDe(c.parsed.y)})` } } }),
+    });
+  } else {
+    graficoDias.data.labels = etiquetas;
+    graficoDias.data.datasets[0].data = valores;
+    graficoDias.data.datasets[0].backgroundColor = colores;
+    graficoDias.update("none");
+  }
+}
+
+function nivelDe(uv) {
+  const i = Math.round(uv);
+  return i <= 2 ? "BAJO" : i <= 5 ? "MODERADO" : i <= 7 ? "ALTO" : i <= 10 ? "MUY ALTO" : "EXTREMO";
+}
+
+// ---------- Gráfico histórico ----------
+// Plugin: pinta las franjas de los niveles de la OMS detrás de la línea
+const franjasOMS = {
+  id: "franjasOMS",
+  beforeDatasetsDraw(chart) {
+    const { ctx, chartArea: a, scales: { y } } = chart;
+    ctx.save();
+    ORDEN.forEach(k => {
+      const n = NIVELES[k];
+      const y1 = y.getPixelForValue(Math.min(n.hasta, y.max)), y0 = y.getPixelForValue(n.desde);
+      if (n.desde >= y.max) return;
+      ctx.fillStyle = n.hex + "26";  // ~15 % de opacidad
+      ctx.fillRect(a.left, y1, a.right - a.left, y0 - y1);
+    });
+    ctx.restore();
+  },
+};
+
+function opcionesBase(tooltipExtra) {
+  const tinta2 = css("--tinta-2"), grilla = css("--grilla");
+  return {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    interaction: { mode: "index", intersect: false },
+    plugins: { legend: { display: false }, tooltip: { displayColors: false, ...tooltipExtra.tooltip } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: tinta2, maxTicksLimit: 8, maxRotation: 0 } },
+      y: { min: 0, suggestedMax: 12, grid: { color: grilla }, ticks: { color: tinta2, stepSize: 2 },
+           title: { display: true, text: "Índice UV", color: tinta2 } },
+    },
+  };
+}
+
+let grafico, horasSel = 1;
+async function actualizarGrafico() {
+  const h = await (await fetch(`/api/historial?horas=${horasSel}`)).json();
+  const fmt = horasSel > 24 ? fmtDiaHora : horasSel <= 1 ? fmtHoraSeg : fmtHora;
+  const etiquetas = h.puntos.map(p => fmt.format(new Date(p.t)));
+  const datos = h.puntos.map(p => p.promedio);
+  const maximos = h.puntos.map(p => p.maximo);
+  if (!grafico) {
+    grafico = new Chart($("grafico"), {
+      type: "line",
+      data: { labels: etiquetas, datasets: [{ label: "Índice UV", data: datos, borderColor: css("--tinta"),
+              borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, tension: 0.25 }] },
+      options: opcionesBase({ tooltip: { callbacks: {
+        label: c => {
+          const max = grafico.$maximos[c.dataIndex];
+          const extra = grafico.$tramo > 10 ? ` · máx ${max.toFixed(1)}` : "";
+          return `UV ${c.parsed.y.toFixed(1)} (${nivelDe(c.parsed.y)})${extra}`;
+        } } } }),
+      plugins: [franjasOMS],
+    });
+  }
+  grafico.$maximos = maximos;
+  grafico.$tramo = h.tramo_s;
+  grafico.data.labels = etiquetas;
+  grafico.data.datasets[0].data = datos;
+  grafico.update("none");
+}
+
+$("filtros").addEventListener("click", e => {
+  if (!e.target.dataset.horas) return;
+  horasSel = parseFloat(e.target.dataset.horas);
+  document.querySelectorAll("#filtros button").forEach(b => b.classList.toggle("activo", b === e.target));
+  actualizarGrafico();
+});
+
+// ---------- Tabla ----------
+async function actualizarTabla() {
+  const datos = await (await fetch("/api/lecturas?limite=12")).json();
+  $("tabla").innerHTML = datos.length === 0
+    ? `<tr><td colspan="4" class="vacio">Sin lecturas todavía</td></tr>`
+    : datos.map(d => `<tr><td>${fmtHoraSeg.format(new Date(d.creado_en))}</td><td>${d.indice_uv.toFixed(1)}</td>
+        <td><span class="leyenda"><span><i style="background:${NIVELES[d.nivel].color}"></i>${d.nivel}</span></span></td>
+        <td>${d.milivoltios}</td></tr>`).join("");
+}
+
+// ---------- Ciclo de actualización ----------
+async function actualizarTodo() {
+  try {
+    await Promise.all([actualizarEstado(), actualizarResumen(), actualizarGrafico(), actualizarTabla()]);
+  } catch (e) {
+    $("punto").className = "punto off";
+    $("txtEnLinea").textContent = "No se pudo conectar con el servidor";
+  }
+}
+actualizarTodo();
+setInterval(actualizarTodo, 5000);  // refresca cada 5 segundos
+</script>
+</body>
+</html>
