@@ -53,13 +53,7 @@ Repetir con la URL de Railway el día de la demo.
 
 ## P4 – Comparación con MeteoChile (pendiente)
 
-Las pruebas del 22-11 fueron bajo techo y de tarde, sin radiación UV. Esta tabla se completa con mediciones al sol de mediodía.
-
-| Hora | Medidor (promedio 5 min) | MeteoChile | Diferencia |
-|---|---|---|---|
-| [hh:mm] | [ ] | [ ] | [ ] |
-| [hh:mm] | [ ] | [ ] | [ ] |
-| [hh:mm] | [ ] | [ ] | [ ] |
+Las pruebas del 22-11 fueron bajo techo y de tarde, sin radiación UV. P4 queda pendiente para una medición al sol de mediodía.
 
 ---
 

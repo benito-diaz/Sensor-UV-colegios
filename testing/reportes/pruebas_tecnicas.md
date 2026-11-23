@@ -103,7 +103,7 @@
 ---
 
 ## Pruebas pendientes
-- [ ] Medición al aire libre a distintas horas y comparación con el índice UV de MeteoChile.
-- [ ] Prueba con linterna UV de 365 nm para recorrer todos los niveles del semáforo.
-- [ ] Prueba de duración con power bank.
-- [ ] Pruebas con usuarios (ver `testing/README.md`).
+- Medición al aire libre a distintas horas y comparación con el índice UV de MeteoChile.
+- Prueba con linterna UV de 365 nm para recorrer todos los niveles del semáforo.
+- Prueba de duración con power bank.
+- Pruebas con usuarios (ver `testing/README.md`).

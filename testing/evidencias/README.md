@@ -9,6 +9,6 @@
 | `05_conexion_en_otro_pc.jpg` | T11 | ESP32 detectado como "Unknown COM3" en otro computador |
 
 ## Pendiente de agregar
-- [ ] Video corto del semáforo cambiando de color (al sol o con linterna UV).
-- [ ] Captura del aviso "Medidor UV conectado" y de la respuesta a `/estado` en Telegram (**sin mostrar el token**).
-- [ ] Fotos de las pruebas con usuarios.
+- Video corto del semáforo cambiando de color (al sol o con linterna UV).
+- Captura del aviso "Medidor UV conectado" y de la respuesta a `/estado` en Telegram (**sin mostrar el token**).
+- Fotos de las pruebas con usuarios.

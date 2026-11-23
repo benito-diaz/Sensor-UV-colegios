@@ -45,10 +45,10 @@ Ejemplo:
 
 ## Checklist de Calidad
 
-- [ ] Resolución mínima 1920×1080
-- [ ] Formato PNG (con transparencia si aplica)
-- [ ] Iluminación sin sombras excesivas
-- [ ] Componentes internos visibles en corte
-- [ ] Fondo neutro o contextual apropiado
-- [ ] Sin aliasing o bordes pixelados
-- [ ] Todos los componentes críticos visibles
+- Resolución mínima 1920×1080
+- Formato PNG (con transparencia si aplica)
+- Iluminación sin sombras excesivas
+- Componentes internos visibles en corte
+- Fondo neutro o contextual apropiado
+- Sin aliasing o bordes pixelados
+- Todos los componentes críticos visibles

@@ -72,8 +72,8 @@ Declaración de librerías, servicios, código externo, modelos 3D de terceros y
 
 |Modelo|Uso|Fuente|
 |-|-|-|
-|ESP32 WROOM CP2102 30 pines (`esp32\_Wroom\_CP2102\_USMmicro.step`)|Volumen del ESP32 dentro del gemelo 3D|Descargado de la comunidad GrabCAD ("esp32-wroom-cp2102-30pins") – \[completar autor y link]|
-|Módulo LED semáforo (`ModLed.STEP`)|Volumen del semáforo dentro del gemelo 3D|Descargado de la comunidad GrabCAD ("moduloledsemaforo") – \[completar autor y link]|
+|ESP32 WROOM CP2102 30 pines (`esp32\_Wroom\_CP2102\_USMmicro.step`)|Volumen del ESP32 dentro del gemelo 3D|Modelo de la comunidad GrabCAD (grabcad.com), descargado por el equipo ("esp32-wroom-cp2102-30pins")|
+|Módulo LED semáforo (`ModLed.STEP`)|Volumen del semáforo dentro del gemelo 3D|Modelo de la comunidad GrabCAD (grabcad.com), descargado por el equipo ("moduloledsemaforo")|
 
 Los demás componentes (LiPo Rider Pro, batería 603450, panel solar 100 × 80, sensor UV) se modelaron como volúmenes con las medidas de las placas reales (ver `diseno\_3d/README.md`). La carcasa es diseño propio del equipo.
 

@@ -12,8 +12,8 @@ Sistema IoT que mide la radiación ultravioleta en el patio de un colegio, la mu
 | Integrante | Rol | GitHub |
 |------------|-----|--------|
 | Benjamín Retamal | Código (firmware, servidor y panel web), esquema electrónico y modelo 3D | [@BenjaRetamal](https://github.com/BenjaRetamal) |
-| Benito Díaz | [completar rol] | [@benito-diaz](https://github.com/benito-diaz) |
-| Max Cornejo | [completar rol] | [completar usuario] |
+| Benito Díaz | Integrante del equipo | [@benito-diaz](https://github.com/benito-diaz) |
+| Max Cornejo | Integrante del equipo | — |
 
 ---
 
@@ -106,7 +106,7 @@ Componentes y conexiones en [`hardware/README.md`](hardware/README.md). Resumen:
 ### Firmware
 1. Arduino IDE 2 + paquete **esp32 by Espressif Systems** + librería **ArduinoJson** (v7).
 2. Abrir `software/src/main.ino` (Arduino pedirá crear la carpeta `main`: aceptar).
-3. Completar el bloque `CONFIGURA ESTO`: WiFi de 2,4 GHz, token y chat ID de Telegram, `SERVER_URL` y `API_KEY`. **Nunca subir estos datos al repositorio.**
+3. Llenar el bloque `CONFIGURA ESTO`: WiFi de 2,4 GHz, token y chat ID de Telegram, `SERVER_URL` y `API_KEY`. **Nunca subir estos datos al repositorio.**
 4. Placa **ESP32 Dev Module**, puerto COM y **Subir**. En el Monitor Serie (115200) debe aparecer `[Nube] POST ... -> 201`.
 
 ### Servidor y panel
@@ -115,7 +115,7 @@ Instrucciones completas en [`software/README.md`](software/README.md#servidor-y-
 Probar sin hardware (con una base PostgreSQL propia):
 ```bash
 cd software/servidor
-cp .env.example .env      # completar con los datos reales
+cp .env.example .env      # poner los datos reales
 npm install
 npm start                 # panel en http://localhost:3000
 ```

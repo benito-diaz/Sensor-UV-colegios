@@ -142,21 +142,21 @@ Formato APA o IEEE consistente:
 Antes de entregar, verificar:
 
 **Contenido:**
-- [ ] Todas las secciones completas
-- [ ] Figuras de alta calidad
-- [ ] Tablas con datos reales
-- [ ] Referencias correctamente citadas
-- [ ] Máximo 15 páginas (sin contar anexos)
+- Todas las secciones completas
+- Figuras de alta calidad
+- Tablas con datos reales
+- Referencias correctamente citadas
+- Máximo 15 páginas (sin contar anexos)
 
 **Formato:**
-- [ ] PDF exportado correctamente
-- [ ] Numeración de páginas
-- [ ] Encabezados consistentes
-- [ ] Márgenes correctos
-- [ ] Sin imágenes pixeladas
+- PDF exportado correctamente
+- Numeración de páginas
+- Encabezados consistentes
+- Márgenes correctos
+- Sin imágenes pixeladas
 
 **Revisión:**
-- [ ] Sin errores ortográficos
-- [ ] Redacción clara y coherente
-- [ ] Todos los integrantes revisaron
-- [ ] Cumple con rúbrica de evaluación
+- Sin errores ortográficos
+- Redacción clara y coherente
+- Todos los integrantes revisaron
+- Cumple con rúbrica de evaluación

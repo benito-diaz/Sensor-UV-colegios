@@ -109,12 +109,10 @@ Detalle de cada versión intermedia en [`iteracion_2/README.md`](iteracion_2/REA
 ## Incorporación de feedback
 
 ### Feedback del Avance #1 → cambios en v2
-1. [Comentario del profesor/ayudante]
-   - Acción tomada: [completar]
+Pendiente: registrar el comentario recibido y la acción tomada.
 
 ### Feedback de la presentación del 19/10 → cambios en v3
-1. [Comentario del profesor/ayudante]
-   - Acción tomada: [completar]
+Pendiente: registrar el comentario recibido y la acción tomada.
 
 ### Conversación con el profesor sobre energía
 - Se evaluará incluir **energía solar**. Por eso la caja v1 se dejó más grande de lo necesario, para ajustarla cuando se defina la parte eléctrica.
